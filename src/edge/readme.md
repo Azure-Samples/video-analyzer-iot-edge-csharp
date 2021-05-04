@@ -26,7 +26,11 @@ In addition to the modules defined in deployment.template.json, this deployment 
 
 ### deployment.grpcyolov3icpu.template.json  
 
-In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [yolov3 module](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/notebooks/Yolo/yolov3/yolov3-grpc-icpu-onnx/avaextension). This IoT Edge module runs the YoloV3 ONNX model behind a gRPC endpoint. This template is used in [this](https://aka.ms/lva-grpc-quickstart) quickstart.
+In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [yolov3 module](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/notebooks/Yolo/yolov3/yolov3-grpc-icpu-onnx/lvaextension). This IoT Edge module runs the YoloV3 ONNX model behind a gRPC endpoint. This template is used in [this](https://aka.ms/lva-grpc-quickstart) quickstart.
+
+### deployment.grpctinyyolov3icpu.template.json  
+
+In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [tinyyolov3 module](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/notebooks/Yolo/yolov3/yolov3-grpc-icpu-onnx/lvaextension). This IoT Edge module runs the TinyYoloV3 ONNX model behind a gRPC endpoint. This template is used in [this](https://aka.ms/lva-grpc-quickstart) quickstart.
 
 ### deployment.objectCounter.template.json
 
