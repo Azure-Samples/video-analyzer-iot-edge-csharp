@@ -80,6 +80,11 @@ The folder **./modules/objectCounter** contains source code for an IoT Edge modu
 
 The folder **./modules/httpExtension** contains source code for an IoT Edge module that exposes a HTTP endpoint where video frames can be posted. Upon receiving the frames, the module calculates the average color and classifies the image as 'light' or 'dark' and returns the result (using the inference schema defined by AVA) in the HTTP response.
 
+
+### grpcExtension
+
+The folder **./modules/grpcExtension** contains source code for an IoT Edge module that exposes a gPRC endpoint where video frames can be sent to. Upon receiving the frames, the module calculates the average color and classifies the image as 'light' or 'dark' and returns the result (using the inference schema defined by AVA) in the gRPC response message.
+
 ## Learn more
 
 * [Develop IoT Edge modules](https://docs.microsoft.com/azure/iot-edge/tutorial-develop-for-linux)
