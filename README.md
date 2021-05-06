@@ -8,7 +8,7 @@ products:
 description: "The samples in this repo show how to use the Azure Video Analyzer on IoT Edge module to analyze live video using AI modules of your choice and optionally record video on the edge device or in the cloud."  
 ---
 
-# Azure Video Analyzer on IoT Edge samples
+# Azure Video Analyzer samples
 
 This repository contains C# samples for Azure Video Analyzer on IoT Edge
 
@@ -51,7 +51,9 @@ The 'src' folder contains three sub-folders
 
 6. [Docker](https://docs.docker.com/engine/install/) on your development machine
 
-You can use the [AVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup) to deploy the Azure resources mentioned above, along with an Azure Linux VM to serve as your IoT Edge device.
+Set up Azure resources:
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://aka.ms/ava-click-to-deploy)
 
 ## Setup
 
@@ -63,7 +65,7 @@ Follow instructions outlined in **src/cloud-to-device-console-app/readme.md** to
 
 ## Key concepts
 
-Read [Azure Video Analyzer on IoT Edge concepts](https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/overview)
+Read [Azure Video Analyzer on IoT Edge concepts](https://docs.microsoft.com/azure/azure-video-analyzer/video-analyzer-docs/overview)
 
 ## Code of conduct
 
