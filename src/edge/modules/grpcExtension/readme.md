@@ -1,6 +1,6 @@
 # gRPC Server
 
-This gRPC server enables your own IoT Edge module to accept video frames as [protobuf](https://github.com/Azure/video-analyzer/tree/master/contracts/grpc) messages and return results back to AVA using the [inference metadata schema](https://docs.microsoft.com/azure/media-services/live-video-analytics-edge/inference-metadata-schema) defined by AVA.
+This gRPC server enables your own IoT Edge module to accept video frames as [protobuf](https://github.com/Azure/video-analyzer/tree/master/contracts/grpc) messages and return results back to AVA using the [inference metadata schema](https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/inference-metadata-schema) defined by AVA.
 
 ## Prerequisites
 
