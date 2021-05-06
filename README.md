@@ -5,12 +5,12 @@ languages:
 products:
   - azure
   - azure-video-analyzer
-description: "The samples in this repo show how to use the Azure Video Analyzer on IoT Edge module to analyze live video using AI modules of your choice and optionally record video on the edge device or in the cloud."  
+description: "The samples in this repo show how to use the Azure Video Analyzer module to analyze live video using AI modules of your choice and optionally record video on the edge device or in the cloud."  
 ---
 
 # Azure Video Analyzer samples
 
-This repository contains C# samples for Azure Video Analyzer on IoT Edge
+This repository contains C# samples for Azure Video Analyzer
 
 ## Contents
 
@@ -25,8 +25,8 @@ This repository contains C# samples for Azure Video Analyzer on IoT Edge
 
 The 'src' folder contains three sub-folders
 
-* **cloud-to-device-console-app** - This folder contains a dotnet core console app that enables you to invoke direct methods of Azure Video Analyzer on IoT Edge module, with parameters defined by you in a JSON file (operations.json).
-* **edge** - This folder has a few IoT Edge deployment manifest templates, along with sample code for an IoT Edge module (under 'modules' folder) that can be used in conjunction with the Azure Video Analyzer on IoT Edge module.
+* **cloud-to-device-console-app** - This folder contains a dotnet core console app that enables you to invoke direct methods of Azure Video Analyzer module, with parameters defined by you in a JSON file (operations.json).
+* **edge** - This folder has a few IoT Edge deployment manifest templates, along with sample code for an IoT Edge module (under 'modules' folder) that can be used in conjunction with the Azure Video Analyzer module.
 
 ## Prerequisites
 
@@ -65,7 +65,7 @@ Follow instructions outlined in **src/cloud-to-device-console-app/readme.md** to
 
 ## Key concepts
 
-Read [Azure Video Analyzer on IoT Edge concepts](https://docs.microsoft.com/azure/azure-video-analyzer/video-analyzer-docs/overview)
+Read [Azure Video Analyzer concepts](https://docs.microsoft.com/azure/azure-video-analyzer/video-analyzer-docs/overview)
 
 ## Code of conduct
 
