@@ -26,11 +26,11 @@ In addition to the modules defined in deployment.template.json, this deployment 
 
 ### deployment.grpcyolov3icpu.template.json  
 
-In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [yolov3 module](https://github.com/Azure/video-analyzer/tree/main/edge-modules/extensions/yolo/yolov3/grpc-cpu). This IoT Edge module runs the YoloV3 ONNX model behind a gRPC endpoint. This template is used in [this](https://aka.ms/lva-grpc-quickstart) quickstart.
+In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [yolov3 module](https://github.com/Azure/video-analyzer/tree/main/edge-modules/extensions/yolo/yolov3/grpc-cpu). This IoT Edge module runs the YoloV3 ONNX model behind a gRPC endpoint. This template is used in [this](https://aka.ms/ava-grpc-quickstart) quickstart.
 
 ### deployment.grpctinyyolov3icpu.template.json  
 
-In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [tinyyolov3 module](https://github.com/Azure/video-analyzer/tree/main/edge-modules/extensions/yolo/tinyyolov3/grpc-cpu). This IoT Edge module runs the TinyYoloV3 ONNX model behind a gRPC endpoint. This template is used in [this](https://aka.ms/lva-grpc-quickstart) quickstart.
+In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [tinyyolov3 module](https://github.com/Azure/video-analyzer/tree/main/edge-modules/extensions/yolo/tinyyolov3/grpc-cpu). This IoT Edge module runs the TinyYoloV3 ONNX model behind a gRPC endpoint. This template is used in [this](https://aka.ms/ava-grpc-quickstart) quickstart.
 
 ### deployment.objectCounter.template.json
 
@@ -38,11 +38,11 @@ In addition to the modules defined in deployment.yolov3.template.json, this depl
 
 ### deployment.openvino.template.json  
 
-In addition to the modules defined in deployment.template.json, this deployment manifest template includes the [OpenVINO™ Model Server – AI Extension](https://aka.ms/lva-intel-ovms) module. This inference server module contains the OpenVINO™ Model Server (OVMS), an inference server powered by the OpenVINO™ toolkit, that is highly optimized for computer vision workloads and developed for Intel architectures. This template is used in [this](https://aka.ms/lva-intel-ovms-tutorial) tutorial.
+In addition to the modules defined in deployment.template.json, this deployment manifest template includes the [OpenVINO™ Model Server – AI Extension](https://aka.ms/ava-intel-ovms) module. This inference server module contains the OpenVINO™ Model Server (OVMS), an inference server powered by the OpenVINO™ toolkit, that is highly optimized for computer vision workloads and developed for Intel architectures. This template is used in [this](https://aka.ms/ava-intel-ovms-tutorial) tutorial.
 
 ### deployment.spatialAnalysis.template.json  
 
-In addition to the modules defined in deployment.template.json, this deployment manifest template includes the [Computer Vision for spatial analysis AI module from Azure Cognitive Services](https://docs.microsoft.com/azure/cognitive-services/computer-vision/spatial-analysis-container?tabs=azure-stack-edge). This module supports operations that enable you to count people in a designated zone within the camera’s field of view, to track when a person crosses a designated line or area, or when people violate a distance rule. This template is used in [this](https://aka.ms/lva-spatial-analysis) tutorial.
+In addition to the modules defined in deployment.template.json, this deployment manifest template includes the [Computer Vision for spatial analysis AI module from Azure Cognitive Services](https://docs.microsoft.com/azure/cognitive-services/computer-vision/spatial-analysis-container?tabs=azure-stack-edge). This module supports operations that enable you to count people in a designated zone within the camera’s field of view, to track when a person crosses a designated line or area, or when people violate a distance rule. This template is used in [this](https://aka.ms/ava-spatial-analysis) tutorial.
 
 ### deployment.yolov3.template.json
 

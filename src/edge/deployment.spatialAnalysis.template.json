@@ -129,7 +129,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "rtptofficial.azurecr.io/spatialanalysis-ava:1.0.1581.121",
+              "image": "mcr.microsoft.com/azure-cognitive-services/vision/spatial-analysis:1.4",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
