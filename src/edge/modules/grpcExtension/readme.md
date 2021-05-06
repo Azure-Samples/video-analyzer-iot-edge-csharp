@@ -120,7 +120,7 @@ Add a new entry to the deployment template for the gRPC module. You will need to
 ```
 
 ### Updating references into pipelineTopologies, to target the gRPC Extension Address
-The [pipelineTopology](https://github.com/Azure/live-video-analytics/blob/master/MediaGraph/topologies/motion-with-grpcExtension/topology.json) must define an gRPC Extension Address:
+The [pipelineTopology](https://github.com/Azure/video-analyzer/tree/main/pipelines/live/topologies/motion-with-grpcExtension/topology.json) must define an gRPC Extension Address:
 
 * gRPC Extension Address Parameter
 ```
@@ -134,13 +134,13 @@ The [pipelineTopology](https://github.com/Azure/live-video-analytics/blob/master
 * Configuration
 ```
 {
-    "@type": "#Microsoft.VideoAnalyzer.MediaGraphGrpcExtension",
+    "@type": "#Microsoft.VideoAnalyzer.GrpcExtension",
     "name": "grpcExtension",
     "endpoint": {
-        "@type": "#Microsoft.VideoAnalyzer.MediaGraphUnsecuredEndpoint",
+        "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
         "url": "${grpcExtensionAddress}",
         "credentials": {
-        "@type": "#Microsoft.VideoAnalyzer.MediaGraphUsernamePasswordCredentials",
+        "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
         "username": "${grpcExtensionUserName}",
         "password": "${grpcExtensionPassword}"
         }
