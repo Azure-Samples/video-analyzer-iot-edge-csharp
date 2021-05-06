@@ -144,9 +144,9 @@ namespace C2D_Console
                 }
                 else
                 {                
-                    JObject avaGraphObject = operationParams;
-                    avaGraphObject.AddFirst(apiVersionProperty);                                
-                    await InvokeMethodWithPayloadAsync(operationName, avaGraphObject.ToString());
+                    JObject avaObjectRequest = operationParams;
+                    avaObjectRequest.AddFirst(apiVersionProperty);                                
+                    await InvokeMethodWithPayloadAsync(operationName, avaObjectRequest.ToString());
                 }
             }
             catch(Exception ex)
