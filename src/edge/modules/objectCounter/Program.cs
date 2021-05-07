@@ -18,7 +18,7 @@ namespace objectCounter
     class Program
     {
         static string objectTag = "";
-        static double objectConfidence = 0;        
+        static double objectConfidence = 0;
 
         static void Main(string[] args)
         {
@@ -74,39 +74,39 @@ namespace objectCounter
 
             if (desiredProperties.Contains("objectConfidence"))
             {
-                objectConfidence = desiredProperties["objectConfidence"];            
+                objectConfidence = desiredProperties["objectConfidence"];
             }
 
             Console.WriteLine("objectTag set to " + objectTag);
-            Console.WriteLine("objectConfidence set to " + objectConfidence.ToString());            
+            Console.WriteLine("objectConfidence set to " + objectConfidence.ToString());
         }
 
         private static async Task OnDesiredPropertyChanged(TwinCollection desiredProperties, object userContext)
-        {                        
+        {
             try
-            {     
+            {
                 ReadDesiredProperties(desiredProperties);
 
                 ModuleClient ioTHubModuleClient = (ModuleClient)userContext;
-                
+
                 TwinCollection reportedProperties = new TwinCollection();
                 reportedProperties["DateTimeLastDesiredPropertyChangeReceived"] = DateTime.Now;
 
                 await ioTHubModuleClient.UpdateReportedPropertiesAsync(reportedProperties).ConfigureAwait(false);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Exception in OnDesiredPropertyChanged");
                 Console.WriteLine(ex);
             }
-        }    
+        }
 
 
         /// <summary>
         /// This method is called whenever the module is sent a message from the EdgeHub.         
         /// </summary>
         static async Task<MessageResponse> CountObjects(Message message, object userContext)
-        {            
+        {
             var moduleClient = userContext as ModuleClient;
             if (moduleClient == null)
             {
@@ -115,14 +115,13 @@ namespace objectCounter
 
             byte[] messageBytes = message.GetBytes();
             string messageString = Encoding.UTF8.GetString(messageBytes);
-            //Console.WriteLine($"Received message: Body: [{messageString}]");
 
             if (!string.IsNullOrEmpty(messageString))
             {
                 int count = 0;
                 dynamic inputMessage = JsonConvert.DeserializeObject(messageString);
                 dynamic detectedObjects = inputMessage.inferences;
-                
+
                 if (detectedObjects != null)
                 {
                     foreach (dynamic inference in detectedObjects)
@@ -136,38 +135,24 @@ namespace objectCounter
                         }
                     }
                 }
-                
+
                 if (count > 0)
                 {
                     string outputMsgString = JsonConvert.SerializeObject(new Dictionary<string, int>() {
                                                                                 { "count", count }
                                                                             });
-                    byte[] outputMsgBytes = System.Text.Encoding.UTF8.GetBytes(outputMsgString);                
+                    byte[] outputMsgBytes = System.Text.Encoding.UTF8.GetBytes(outputMsgString);
 
                     using (var outputMessage = new Message(outputMsgBytes))
                     {
-                        //outputMessage.Properties.Add("eventType", "Microsoft.Media.Graph.Signaling.SignalGateTrigger");
-                        
                         string subject = message.Properties["subject"];
-                        string graphInstanceSignature = "/livePipelines/";
-                        if (subject.IndexOf(graphInstanceSignature) == 0)
+                        string signature = "/livePipelines/";
+                        if (subject.IndexOf(signature) == 0)
                         {
-                            int graphInstanceNameIndex = graphInstanceSignature.Length;
-                            int graphInstanceNameEndIndex = subject.IndexOf("/", graphInstanceNameIndex);
-                            string graphInstanceName = subject.Substring(0, graphInstanceNameEndIndex);
-                            //outputMessage.Properties.Add("eventTarget", graphInstanceName);
-
                             outputMessage.Properties.Add("eventTime", message.Properties["eventTime"]);
                             await moduleClient.SendEventAsync("objectCountTrigger", outputMessage);
                         }
-
-                    
-                       // Console.WriteLine("Message sent: " + outputMsgString);
                     }
-                }
-                else
-                {
-                    //Console.WriteLine("No message sent as object count was zero");
                 }
             }
             return MessageResponse.Completed;
