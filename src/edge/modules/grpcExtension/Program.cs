@@ -67,7 +67,7 @@ namespace GrpcExtension
             var grpcPort = grpcUrl.Port;
             var grpcHost = grpcUrl.Host;
 
-            var moduleExtension = new MediaGraphExtensionService(_logger, batchSize);
+            var moduleExtension = new LivePipelineExtensionService(_logger, batchSize);
             _grpcServer = new Server(new[]
             {
                 // Allow for large message transfers (hi-resolution images can go beyond 4MB default gRPC limit)

@@ -17,12 +17,12 @@ using Newtonsoft.Json;
 
 namespace GrpcExtension
 {
-    public class MediaGraphExtensionService : MediaGraphExtension.MediaGraphExtensionBase
+    public class LivePipelineExtensionService : MediaGraphExtension.MediaGraphExtensionBase
     {
         private readonly ILogger _logger;
         private readonly int _batchSize;
 
-        public MediaGraphExtensionService(ILogger logger, int batchSize)
+        public LivePipelineExtensionService(ILogger logger, int batchSize)
         {
             _logger = logger;
             _batchSize = batchSize;

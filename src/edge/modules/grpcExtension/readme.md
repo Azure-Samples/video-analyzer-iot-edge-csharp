@@ -21,12 +21,12 @@ Task StartAsync(CancellationToken cancellationToken)
 ```
 In this method we:
 1. Create an instance of gRPC server.
-2. Create an instance of the service implementation class **MediaGraphExtensionService**.
-3. Register MediaGraphExtensionService service implementation by adding its service definition to the Services collection.
+2. Create an instance of the service implementation class **LivePipelineExtensionService**.
+3. Register LivePipelineExtensionService service implementation by adding its service definition to the Services collection.
 4. Set the address and port the gRPC server will listen on for client requests.
 5. Initialize the gRPC server.
 
-*Services\MediaGraphExtensionService.cs*: this class is responsible for handling the  [protobuf](https://github.com/Azure/video-analyzer/tree/master/contracts/grpc) messages communication with the AVA client. 
+*Services\LivePipelineExtensionService.cs*: this class is responsible for handling the  [protobuf](https://github.com/Azure/video-analyzer/tree/master/contracts/grpc) messages communication with the AVA client. 
 
 ```
 async override Task ProcessMediaStream(IAsyncStreamReader<MediaStreamMessage> requestStream, IServerStreamWriter<MediaStreamMessage> responseStream, ServerCallContext context)
@@ -42,7 +42,7 @@ In this method we:
 ```
 IEnumerable<Inference> ProcessImages(List<Image> images)
 ```
-Once you've added the new class, you'll have to update the MediaGraphExtensionService so it instantiates your class and invokes the **ProcessImages** method on it to run your processing logic.
+Once you've added the new class, you'll have to update the LivePipelineExtensionService so it instantiates your class and invokes the **ProcessImages** method on it to run your processing logic.
 
 ### Building, publishing and running the Docker container
 
@@ -168,7 +168,7 @@ The [pipelineTopology](https://github.com/Azure/video-analyzer/tree/main/pipelin
 }
 ```
 
-The frames can be transferred through shared memory or they can be embedded in the message. The data transfer mode can be configured in the pipelineTopology to determine how frames will be transferred. This is achieved by configuring the dataTransfer element of the MediaGraphGrpcExtension as shown below:
+The frames can be transferred through shared memory or they can be embedded in the message. The data transfer mode can be configured in the pipelineTopology to determine how frames will be transferred. This is achieved by configuring the dataTransfer element of the GrpcExtension as shown below:
 
 Embedded:
 ```JSON
