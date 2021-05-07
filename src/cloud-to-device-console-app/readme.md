@@ -28,7 +28,9 @@ Create a file named appsettings.json in this folder. Add the following text and 
 * **deviceId** - Refers to your IoT Edge device id (registered with your IoT Hub)
 * **moduleId** - Refers to the module id of Azure Video Analyzer on IoT Edge module (when deployed to the IoT Edge device)
 
-You can run the [AVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup) to generate a **appsettings.json** file with values filled out.
+Set up Azure resources:
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://aka.ms/ava-click-to-deploy)
 
 Create a file named .env in src/edge folder and add the following text to it. Provide values for all variables.
 
@@ -44,11 +46,9 @@ CONTAINER_REGISTRY_USERNAME_myacr="<user name for your Azure Container Registry>
 CONTAINER_REGISTRY_PASSWORD_myacr="<password for the registry>"
 ```
 
-You can run the [AVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup), which generates the **.env** file with values filled out.
-
 ## Running the sample
 
-Detailed instructions for running the sample can be found in the quickstarts (such as [this](https://docs.microsoft.com/azure/media-services/live-video-analytics-edge/detect-motion-emit-events-quickstart) one) and tutorials for Azure Video Analyzer on IoT Edge. Below is a summary of the key steps.
+Detailed instructions for running the sample can be found in the quickstarts (such as [this](https://docs.microsoft.com/azure/azure-video-analyzer/video-analyzer-docs/detect-motion-emit-events-quickstart) one) and tutorials for Azure Video Analyzer on IoT Edge. Below is a summary of the key steps.
 
 * Open your local clone of this git repository in Visual Studio Code, have the [Azure Iot Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools) extension installed. 
 * Right click on src/edge/deployment.template.json and select **“Generate Iot Edge deployment manifest”**. This will create an IoT Edge deployment manifest file in src/edge/config folder named deployment.amd64.json.
@@ -58,4 +58,4 @@ Detailed instructions for running the sample can be found in the quickstarts (su
 
 ## Next steps
 
-Experiment with different [pipelineTopologies](https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/pipeline) by modifying operations.json.
+Experiment with different [pipelineTopologies](https://docs.microsoft.com/azure/azure-video-analyzer/video-analyzer-docs/pipeline) by modifying operations.json.
