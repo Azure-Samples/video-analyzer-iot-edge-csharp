@@ -43,7 +43,7 @@ The 'src' folder contains two sub-folders
     
     e. Azure container registry
 
-3. A Linux edge device with [IoT Edge runtime](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux)
+3. A Linux edge device with [IoT Edge runtime](https://docs.microsoft.com/azure/iot-edge/how-to-install-iot-edge-linux)
 
 4. [Visual Studio Code](https://code.visualstudio.com/) on your development machine with following extensions
 
@@ -74,4 +74,3 @@ Read [Azure Video Analyzer concepts](https://docs.microsoft.com/azure/azure-vide
 ## Code of conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
