@@ -1,15 +1,15 @@
 # gRPC Server
 
-This gRPC server enables your own IoT Edge module to accept video frames as [protobuf](https://github.com/Azure/live-video-analytics/tree/master/contracts/grpc) messages and return results back to AVA using the [inference metadata schema](https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/inference-metadata-schema) defined by AVA.
+This gRPC server enables your own IoT Edge module to accept video frames as [protobuf](https://github.com/Azure/video-analyzer/tree/main/contracts/grpc) messages and return results back to AVA using the [inference metadata schema](https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/inference-metadata-schema) defined by AVA.
 
 ## Prerequisites
 
 1. [Install Docker](https://docs.docker.com/desktop/#download-and-install) on your machine
-1. [Install IoT Edge Runtime](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge?tabs=linux)
+1. [Install IoT Edge Runtime](https://docs.microsoft.com/azure/iot-edge/how-to-install-iot-edge?tabs=linux)
 
 ### Design
 
-This gPRC server is a .NET Core console application that will house your custom AI and is built to handle the [protobuf](https://github.com/Azure/live-video-analytics/tree/master/contracts/grpc) messages sent between AVA and your custom AI. AVA sends a media stream descriptor which defines what information will be sent followed by video frames to the server as a [protobuf](https://github.com/Azure/live-video-analytics/tree/master/contracts/grpc) message over the gRPC stream session. The server validates the stream descriptor, analyses the video frame, processes it using an Image Processor, and returns inference results as a [protobuf](https://github.com/Azure/live-video-analytics/tree/master/contracts/grpc) message. 
+This gPRC server is a .NET Core console application that will house your custom AI and is built to handle the [protobuf](https://github.com/Azure/video-analyzer/tree/main/contracts/grpc) messages sent between AVA and your custom AI. AVA sends a media stream descriptor which defines what information will be sent followed by video frames to the server as a [protobuf](https://github.com/Azure/video-analyzer/tree/main/contracts/grpc) message over the gRPC stream session. The server validates the stream descriptor, analyses the video frame, processes it using an Image Processor, and returns inference results as a [protobuf](https://github.com/Azure/video-analyzer/tree/main/contracts/grpc) message. 
 The frames can be transferred through shared memory or they can be embedded in the message. The date transfer mode can be configured in the pipelineTopology to determine how frames will be transferred.
 The gRPC server supports batching frames, this is configured using the *batchSize* parameter.
 
@@ -21,12 +21,12 @@ Task StartAsync(CancellationToken cancellationToken)
 ```
 In this method we:
 1. Create an instance of gRPC server.
-2. Create an instance of the service implementation class **MediaGraphExtensionService**.
-3. Register MediaGraphExtensionService service implementation by adding its service definition to the Services collection.
+2. Create an instance of the service implementation class **PipelineExtensionService**.
+3. Register PipelineExtensionService service implementation by adding its service definition to the Services collection.
 4. Set the address and port the gRPC server will listen on for client requests.
 5. Initialize the gRPC server.
 
-*Services\MediaGraphExtensionService.cs*: this class is responsible for handling the  [protobuf](https://github.com/Azure/live-video-analytics/tree/master/contracts/grpc) messages communication with the AVA client. 
+*Services\PipelineExtensionService.cs*: this class is responsible for handling the  [protobuf](https://github.com/Azure/video-analyzer/tree/main/contracts/grpc) messages communication with the AVA client. 
 
 ```
 async override Task ProcessMediaStream(IAsyncStreamReader<MediaStreamMessage> requestStream, IServerStreamWriter<MediaStreamMessage> responseStream, ServerCallContext context)
@@ -42,7 +42,7 @@ In this method we:
 ```
 IEnumerable<Inference> ProcessImages(List<Image> images)
 ```
-Once you've added the new class, you'll have to update the MediaGraphExtensionService so it instantiates your class and invokes the **ProcessImages** method on it to run your processing logic.
+Once you've added the new class, you'll have to update the PipelineExtensionService so it instantiates your class and invokes the **ProcessImages** method on it to run your processing logic.
 
 ### Building, publishing and running the Docker container
 
@@ -54,7 +54,7 @@ First, a couple assumptions
 * Our local Docker container image is already loged into ACR.
 * In this sample, our ACR name is "myregistry". Your name may defer, so please update it properly in the following commands.
 
-> If you're unfamiliar with ACR or have any questions, please follow this [demo on building and pushing an image into ACR](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli).
+> If you're unfamiliar with ACR or have any questions, please follow this [demo on building and pushing an image into ACR](https://docs.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli).
 
 `cd` onto the grpc extension's root directory 
 
@@ -86,7 +86,7 @@ Add a new entry to the deployment template for the gRPC module. You will need to
 * "image": 
     * `registry/image:tag`: replace this with the corresponding location/image:tag where you've pushed the image built from the `Dockerfile`
 * "IpcMode": 
-    * `host`: You'll need to set this `IpcMode` when shared memory is going to be used as transfer mode.
+    * `IpcMode`: You'll need to set this `host` when shared memory is going to be used as transfer mode.
 * "Env": you can override the port and batch size by setting the following environment variables:
     * `grpcBinding`: the port the gRPC server will listen on, in the excerpt below the gRPC server is listening on port 5001
     * `batchSize`: the size of the batch, set batchSize=1 to run on a per frame basis
@@ -120,7 +120,7 @@ Add a new entry to the deployment template for the gRPC module. You will need to
 ```
 
 ### Updating references into pipelineTopologies, to target the gRPC Extension Address
-The [pipelineTopology](https://github.com/Azure/live-video-analytics/blob/master/MediaGraph/topologies/motion-with-grpcExtension/topology.json) must define an gRPC Extension Address:
+The [pipelineTopology](https://github.com/Azure/video-analyzer/tree/main/pipelines/live/topologies/motion-with-grpcExtension/topology.json) must define an gRPC Extension Address:
 
 * gRPC Extension Address Parameter
 ```
@@ -134,13 +134,13 @@ The [pipelineTopology](https://github.com/Azure/live-video-analytics/blob/master
 * Configuration
 ```
 {
-    "@type": "#Microsoft.VideoAnalyzer.MediaGraphGrpcExtension",
+    "@type": "#Microsoft.VideoAnalyzer.GrpcExtension",
     "name": "grpcExtension",
     "endpoint": {
-        "@type": "#Microsoft.VideoAnalyzer.MediaGraphUnsecuredEndpoint",
+        "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
         "url": "${grpcExtensionAddress}",
         "credentials": {
-        "@type": "#Microsoft.VideoAnalyzer.MediaGraphUsernamePasswordCredentials",
+        "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
         "username": "${grpcExtensionUserName}",
         "password": "${grpcExtensionPassword}"
         }
@@ -168,7 +168,7 @@ The [pipelineTopology](https://github.com/Azure/live-video-analytics/blob/master
 }
 ```
 
-The frames can be transferred through shared memory or they can be embedded in the message. The data transfer mode can be configured in the pipelineTopology to determine how frames will be transferred. This is achieved by configuring the dataTransfer element of the MediaGraphGrpcExtension as shown below:
+The frames can be transferred through shared memory or they can be embedded in the message. The data transfer mode can be configured in the pipelineTopology to determine how frames will be transferred. This is achieved by configuring the dataTransfer element of the GrpcExtension as shown below:
 
 Embedded:
 ```JSON
@@ -216,21 +216,16 @@ gRPC extension module:
 }
 ```
 
-**Note:** You will need to update the **apiVersion** parmater as well when using AVA module
-```
-"@apiVersion": "1.0"
-```
-
 ## Upload Docker image to Azure container registry
 
-Follow instructions in [Push and Pull Docker images  - Azure Container Registry](http://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli) to save your image for later use on another machine.
+Follow instructions in [Push and Pull Docker images - Azure Container Registry](http://docs.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli) to save your image for later use on another machine.
 
 ## Deploy as an Azure IoT Edge module
 
-Follow instruction in [Deploy module from Azure portal](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-portal) to deploy the container image as an IoT Edge module (use the IoT Edge module option).
+Follow instruction in [Deploy module from Azure portal](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-modules-portal) to deploy the container image as an IoT Edge module (use the IoT Edge module option).
 
 ## gRPC server response
-Once the setup is complete and you instantiate the [gRPCExtension pipelineTopology](https://github.com/Azure/live-video-analytics/blob/master/MediaGraph/topologies/grpcExtension/topology.json) using [our VSCode quickstart](https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/analyze-live-video-use-your-grpc-model-quickstart?pivots=programming-language-csharp) or via Azure Portal, you will see JSON printed on your screen that looks something like this
+Once the setup is complete and you instantiate the [gRPCExtension pipelineTopology](https://github.com/Azure/video-analyzer/tree/main/pipelines/live/topologies/grpcExtension/topology.json) using [our VSCode quickstart](https://aka.ms/ava-grpc-quickstart) or via Azure Portal, you will see JSON printed on your screen that looks something like this
 
 ```JSON
 {

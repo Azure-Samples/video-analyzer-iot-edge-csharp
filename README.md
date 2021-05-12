@@ -5,12 +5,12 @@ languages:
 products:
   - azure
   - azure-video-analyzer
-description: "The samples in this repo show how to use the Azure Video Analyzer on IoT Edge module to analyze live video using AI modules of your choice and optionally record video on the edge device or in the cloud."  
+description: "The samples in this repo show how to use the Azure Video Analyzer module to analyze live video using AI modules of your choice and optionally record video on the edge device or in the cloud."  
 ---
 
-# Azure Video Analyzer on IoT Edge samples
+# Azure Video Analyzer samples
 
-This repository contains C# samples for Azure Video Analyzer on IoT Edge
+This repository contains C# samples for Azure Video Analyzer
 
 ## Contents
 
@@ -23,23 +23,27 @@ This repository contains C# samples for Azure Video Analyzer on IoT Edge
 | `SECURITY`           | Guidelines for reporting security issues   |
 | `CODE_OF_CONDUCT.md` | Open source code of conduct                |
 
-The 'src' folder contains three sub-folders
+The 'src' folder contains two sub-folders
 
-* **cloud-to-device-console-app** - This folder contains a dotnet core console app that enables you to invoke direct methods of Azure Video Analyzer on IoT Edge module, with parameters defined by you in a JSON file (operations.json).
-* **edge** - This folder has a few IoT Edge deployment manifest templates, along with sample code for an IoT Edge module (under 'modules' folder) that can be used in conjunction with the Azure Video Analyzer on IoT Edge module.
+* **cloud-to-device-console-app** - This folder contains a dotnet core console app that enables you to invoke direct methods of Azure Video Analyzer module, with parameters defined by you in a JSON file (operations.json).
+* **edge** - This folder has a few IoT Edge deployment manifest templates, along with sample code for an IoT Edge module (under 'modules' folder) that can be used in conjunction with the Azure Video Analyzer module.
 
 ## Prerequisites
 
 1. An active Azure subscription
 2. Azure resources deployed in the Azure subscription
 
-    a. IoT Hub
+    a. Video Analyzer account
 
-    b. Storage Account
+    b. Storage account
 
-    c. Azure container registry
+    c. Managed Identity
 
-3. A Linux edge device with [IoT Edge runtime](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux)
+    d. IoT Hub
+    
+    e. Azure container registry
+
+3. A Linux edge device with [IoT Edge runtime](https://docs.microsoft.com/azure/iot-edge/how-to-install-iot-edge-linux)
 
 4. [Visual Studio Code](https://code.visualstudio.com/) on your development machine with following extensions
 
@@ -51,7 +55,9 @@ The 'src' folder contains three sub-folders
 
 6. [Docker](https://docs.docker.com/engine/install/) on your development machine
 
-You can use the [AVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup) to deploy the Azure resources mentioned above, along with an Azure Linux VM to serve as your IoT Edge device.
+Set up Azure resources:
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://aka.ms/ava-click-to-deploy)
 
 ## Setup
 
@@ -63,9 +69,8 @@ Follow instructions outlined in **src/cloud-to-device-console-app/readme.md** to
 
 ## Key concepts
 
-Read [Azure Video Analyzer on IoT Edge concepts](https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/overview)
+Read [Azure Video Analyzer concepts](https://docs.microsoft.com/azure/azure-video-analyzer/video-analyzer-docs/overview)
 
 ## Code of conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.

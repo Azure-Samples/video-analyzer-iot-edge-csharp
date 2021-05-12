@@ -57,7 +57,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/ava-utilities/ava_edge:1.0.01573.2656",
+              "image": "mcr.microsoft.com/media/azure-video-analyzer:1",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -81,7 +81,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/ava-utilities/yolov3-onnx:1.0",
+              "image": "mcr.microsoft.com/lva-utilities/yolov3-onnx:1.0",
               "createOptions": {}
             }
           },
@@ -91,7 +91,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/ava-utilities/rtspsim-live555:1.2",
+              "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -130,7 +130,7 @@
         "diagnosticsEventsOutputName": "diagnostics",
         "operationalEventsOutputName": "operational",
         "logLevel": "information",
-        "logCategories": "application",
+        "logCategories": "application, events",
         "debugLogsDirectory": "/tmp/logs",
         "allowUnsecuredEndpoints": true,
         "telemetryOptOut": false

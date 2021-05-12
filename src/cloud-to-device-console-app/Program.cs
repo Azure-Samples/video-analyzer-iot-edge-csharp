@@ -52,7 +52,7 @@ namespace C2D_Console
                     switch(operationName)
                     {
                         case "pipelineTopologySet" :      
-                            await ExecuteGraphpipelineTopologySetOperationAsync(operationParams, apiVersionProperty);
+                            await ExecutePipelineTopologySetOperationAsync(operationParams, apiVersionProperty);
                             break;
 
                         case "pipelineTopologyList" :
@@ -64,7 +64,7 @@ namespace C2D_Console
                         case "livePipelineSet" :
                         case "pipelineTopologyDelete" :
                         case "pipelineTopologyGet" :
-                            await ExecuteGraphOperationAsync(operationParams, operationName, apiVersionProperty);
+                            await ExecuteLivePipelineOperationAsync(operationParams, operationName, apiVersionProperty);
                             break;
 
                         case "WaitForInput" :                            
@@ -94,7 +94,7 @@ namespace C2D_Console
             Console.ResetColor();
         }
 
-        static async Task ExecuteGraphpipelineTopologySetOperationAsync(JObject operationParams, JProperty apiVersionProperty)
+        static async Task ExecutePipelineTopologySetOperationAsync(JObject operationParams, JProperty apiVersionProperty)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace C2D_Console
                 {
                     if (operationParams["pipelineTopologyUrl"] != null)
                     {
-                        // Download the MediaGraph pipelineTopology JSON and invoke pipelineTopologySet
+                        // Download the pipelineTopology JSON and invoke pipelineTopologySet
                         string pipelineTopologyJson = await DownloadFromUrlAsync((string)operationParams["pipelineTopologyUrl"]);                        
                         await InvokeMethodWithPayloadAsync("pipelineTopologySet", pipelineTopologyJson);
                     }
@@ -132,7 +132,7 @@ namespace C2D_Console
             }
         }
 
-        static async Task ExecuteGraphOperationAsync(JObject operationParams, string operationName, JProperty apiVersionProperty)
+        static async Task ExecuteLivePipelineOperationAsync(JObject operationParams, string operationName, JProperty apiVersionProperty)
         {
             try
             {
@@ -144,9 +144,9 @@ namespace C2D_Console
                 }
                 else
                 {                
-                    JObject avaGraphObject = operationParams;
-                    avaGraphObject.AddFirst(apiVersionProperty);                                
-                    await InvokeMethodWithPayloadAsync(operationName, avaGraphObject.ToString());
+                    JObject avaObjectRequest = operationParams;
+                    avaObjectRequest.AddFirst(apiVersionProperty);                                
+                    await InvokeMethodWithPayloadAsync(operationName, avaObjectRequest.ToString());
                 }
             }
             catch(Exception ex)

@@ -72,7 +72,7 @@ Let's decompose it a bit:
 * `registry/image:tag`: replace this with the corresponding location/image:tag where you've pushed the image built from the `Dockerfile`
 
 ### Updating references into Topologies, to target the HTTPS inferencing container address
-The topology (i.e. https://github.com/Azure/live-video-analytics/blob/master/MediaGraph/topologies/httpExtension/topology.json) must define an inferencing URL:
+The topology (i.e. https://github.com/Azure/video-analyzer/tree/main/pipelines/live/topologies/httpExtension/topology.json) must define an inferencing URL:
 
 * Url Parameter
 ```
@@ -91,13 +91,13 @@ The topology (i.e. https://github.com/Azure/live-video-analytics/blob/master/Med
   "properties": {
     "processors": [
       {
-        "@type": "#Microsoft.VideoAnalyzer.MediaGraphHttpExtension",
+        "@type": "#Microsoft.VideoAnalyzer.RtspSource",
         "name": "inferenceClient",
         "endpoint": {
-          "@type": "#Microsoft.VideoAnalyzer.MediaGraphTlsEndpoint",
+          "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
           "url": "${inferencingUrl}",
           "credentials": {
-            "@type": "#Microsoft.VideoAnalyzer.MediaGraphUsernamePasswordCredentials",
+            "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
             "username": "${inferencingUserName}",
             "password": "${inferencingPassword}"
           }

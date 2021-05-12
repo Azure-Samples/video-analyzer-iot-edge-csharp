@@ -12,16 +12,16 @@
         {
             "opName": "pipelineTopologySet",
             "opParams": {
-                "pipelineTopologyFile": "https://<update_url_to_topology.json>"
+                "pipelineTopologyUrl": "https://<update_url_to_topology.json>"
             }
         },
         {
             "opName": "livePipelineSet",
             "opParams": {
-                "name": "Sample-Graph-1",
+                "name": "Sample-Pipeline-1",
                 "properties": {
                     "topologyName": "TopologyName",
-                    "description": "Sample graph description",
+                    "description": "Sample description",
                     "parameters": [
                         {
                             "name": "rtspUrl",
@@ -42,7 +42,7 @@
         {
             "opName": "livePipelineActivate",
             "opParams": {
-                "name": "Sample-Graph-1"
+                "name": "Sample-Pipeline-1"
             }
         },
         {
@@ -54,13 +54,13 @@
         {
             "opName": "livePipelineDeactivate",
             "opParams": {
-                "name": "Sample-Graph-1"
+                "name": "Sample-Pipeline-1"
             }
         },
         {
             "opName": "livePipelineDelete",
             "opParams": {
-                "name": "Sample-Graph-1"
+                "name": "Sample-Pipeline-1"
             }
         },
         {
