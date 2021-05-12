@@ -121,6 +121,7 @@ namespace objectCounter
                 int count = 0;
                 dynamic inputMessage = JsonConvert.DeserializeObject(messageString);
                 dynamic detectedObjects = inputMessage.inferences;
+
                 if (detectedObjects != null)
                 {
                     foreach (dynamic inference in detectedObjects)
@@ -134,6 +135,7 @@ namespace objectCounter
                         }
                     }
                 }
+
                 if (count > 0)
                 {
                     string outputMsgString = JsonConvert.SerializeObject(new Dictionary<string, int>() {
