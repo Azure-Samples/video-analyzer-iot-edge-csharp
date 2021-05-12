@@ -41,15 +41,23 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/azure-video-analyzer:1",
-              "createOptions": "{ \"HostConfig\": { \"LogConfig\": { \"Type\": \"\", \"Config\": { \"max-size\": \"10m\", \"max-file\": \"10\" } }, \"Binds\": [ \"/var/media/:/var/media/\", \"/var/lib/videoanalyzer/:/var/lib/videoanalyzer\" ], \"IpcMode\": \"shareable\", \"ShmSize\": 1536870912 } }"
-            },
-            "env": {
-              "LOCAL_USER_ID": {
-                "value": "1010"
-              },
-              "LOCAL_GROUP_ID": {
-                "value": "1010"
+              "image": "mcr.microsoft.com/media/azure-video-analyzer:1",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "Binds": [
+                    "$VIDEO_OUTPUT_FOLDER_ON_DEVICE:/var/media/",
+                    "$APPDATA_FOLDER_ON_DEVICE:/var/lib/videoanalyzer"
+                  ],
+                  "IpcMode": "host",
+                  "ShmSize": 1536870912
+                }
               }
             }
           },
@@ -62,17 +70,11 @@
               "image": "intel/video-analytics-serving:0.5.0-dlstreamer-edge-ai-extension",
               "createOptions": {
                 "ExposedPorts": {
-                  "80/tcp": {
-                    
-                  },
-                  "5001/tcp": {
-                    
-                  }
+                  "80/tcp": {},
+                  "5001/tcp": {}
                 },
                 "HostConfig": {
-                  "Binds": [
-                    "/tmp:/tmp"
-                  ],
+                  "Binds": ["/tmp:/tmp"],
                   "PortBindings": {
                     "80/tcp": [
                       {
@@ -92,7 +94,7 @@
                       "max-file": "10"
                     }
                   },
-                  "IpcMode": "container:avaedge"
+                  "IpcMode": "host"
                 }
               }
             }
@@ -104,7 +106,20 @@
             "restartPolicy": "always",
             "settings": {
               "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
-              "createOptions": "{ \"HostConfig\": { \"Binds\": [ \"/home/localedgeuser/samples/input:/live/mediaServer/media\" ] } }"
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "Binds": [
+                    "$VIDEO_INPUT_FOLDER_ON_DEVICE:/live/mediaServer/media"
+                  ]
+                }
+              }
             }
           }
         }
@@ -124,11 +139,11 @@
     "avaedge": {
       "properties.desired": {
         "applicationDataDirectory": "/var/lib/videoanalyzer",
-        "ProvisioningToken": "$AVA_PROVISIONING_TOKEN",
+        "provisioningToken": "$AVA_PROVISIONING_TOKEN",
         "diagnosticsEventsOutputName": "diagnostics",
         "operationalEventsOutputName": "operational",
         "logLevel": "information",
-        "logCategories": "application",
+        "logCategories": "application, events",
         "debugLogsDirectory": "/tmp/logs",
         "allowUnsecuredEndpoints": true,
         "telemetryOptOut": false
