@@ -53,7 +53,7 @@
               }
             }
           },
-          "avaExtension": {
+          "avaextension": {
             "version": "1.1",
             "type": "docker",
             "status": "running",
