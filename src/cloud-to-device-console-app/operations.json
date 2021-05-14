@@ -48,7 +48,7 @@
         {
             "opName": "WaitForInput",
             "opParams": {
-                "message": "Press Enter to continue. This is start the deactivating steps."
+                "message": "Press Enter to continue. This will start the deactivating steps."
             }
         },
         {
