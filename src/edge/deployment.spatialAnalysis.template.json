@@ -176,10 +176,10 @@
                 "value": "true"
               },
               "BILLING": {
-                "value": "<Use endpoint from Archon azure resource (overview page)>"
+                "value": "<Use endpoint from Cognitive Services azure resource (overview page)>"
               },
               "APIKEY": {
-                "value": "<Use one key from Archon azure resource (keys page)>"
+                "value": "<Use one key from Cognitive Services azure resource (keys page)>"
               },
               "LAUNCHER_TYPE": {
                 "value": "avaBackend"
