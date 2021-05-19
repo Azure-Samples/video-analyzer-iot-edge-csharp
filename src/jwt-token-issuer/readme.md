@@ -3,7 +3,7 @@
 This folder contains a [JSON Web Token](https://datatracker.ietf.org/doc/html/rfc7519) generation application to use with Video Analyzer.
 
 ## Prerequisites 
-  * Install [].Net 5.0.x SDK](https://dotnet.microsoft.com/download)
+  * Install [.Net 5.0.x SDK](https://dotnet.microsoft.com/download)
 
 ## Build the JWTTokenIssuer
 1.  Download the files
@@ -27,7 +27,7 @@ Generating from a one time self-signed certificate:
   JwtTokenIssuer
   ```
 
-[!NOTE] This is auto-generate a self-signed certificate. **It is highly recommended that you do not use an auto-generated certificate**.  If you continue to use the auto-generated certificate you will be required to update the Video Analyzer's access policy every time you generate a new token to reflect the new certificate's Issuer, Audience, Key Type, Algorithm, Key ID, RSA Key Module, and the RSA Key Exponent.
+[!NOTE] This will auto-generate a self-signed certificate. **It is highly recommended that you do not use an auto-generated certificate**.  If you continue to use the auto-generated certificate you will be required to update the Video Analyzer's access policy every time you generate a new token to reflect the new certificate's Issuer, Audience, Key Type, Algorithm, Key ID, RSA Key Module, and the RSA Key Exponent.
 
 Generating from a one time self-signed certificate with custom parameters:
 
