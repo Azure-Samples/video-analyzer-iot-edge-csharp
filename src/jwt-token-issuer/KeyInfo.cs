@@ -4,8 +4,6 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 
-using Newtonsoft.Json;
-
 namespace Tools.JwtTokenIssuer
 {
     /// <summary>
