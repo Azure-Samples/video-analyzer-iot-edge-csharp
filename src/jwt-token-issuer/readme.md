@@ -11,7 +11,7 @@ This folder contains a [JSON Web Token](https://datatracker.ietf.org/doc/html/rf
 3.  run `dotnet build`
 4.  run `dotnet run`
    
-[!NOTE] The dotnet build created bin folder in the same directory.  Path to the compiled application is -  {directory}\bin\Debug\netcoreapp3.1\JwtTokenIssuer.exe
+**NOTE:** The dotnet build created bin folder in the same directory.  Path to the compiled application is -  {directory}\bin\Debug\netcoreapp3.1\JwtTokenIssuer.exe
 
 ## Usage
 
