@@ -20,13 +20,18 @@ export class FetchData extends Component {
             pipelineTopologies: [],
             livePipelines: [],
             loading: true,
+            loadingPipelineTopologies: true,
+            loadingLivePipelines: true,
             behindProxy: false,
+            videoName: "",
             livePipelineName: "",
             rtspUrl: "",
             rtspUsername: "",
             rtspPassword: "",
             livePipelineTopologyName: "",
-            livePipelineState: "inactive"
+            livePipelineState: "inactive",
+            livePipelineEnabled: false,
+            pipelineTopologiesEnabled: false
         };
         this.token = null;
         this.deletePipelineTopology = this.deletePipelineTopologyOperation.bind(this);
@@ -55,14 +60,20 @@ export class FetchData extends Component {
         const token = this.token;
         const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}${apiVersion}`;
         try {
-            await fetch(url, {
+            const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
             });
 
-            await this.getLivePipelines();
+            if (response.ok) {
+                await this.getLivePipelines();
+            }
+            else {
+                const errorMessageObj = await response.json();
+                alert(`Cannot delete livepipeline: ${errorMessageObj.error.message}`);
+            }
         }
         catch (e) {
             console.log(e);
@@ -73,14 +84,20 @@ export class FetchData extends Component {
         const token = this.token;
         const url = `${baseUrl}/${accountName}//pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
         try {
-            await fetch(url, {
+            const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
             });
 
-            await this.getPipelinesTopologies();
+            if (response.ok) {
+                await this.getPipelinesTopologies();
+            }
+            else {
+                const errorMessageObj = await response.json();
+                alert(`Cannot delete pipelineTopology: ${errorMessageObj.error.message}`);
+            }
         }
         catch (e) {
             console.log(e);
@@ -181,19 +198,19 @@ export class FetchData extends Component {
             });
 
             if (response.ok) {
-                this.setState({ pipelineTopologyName: "", videoName: "", behindProxy: false });
-                await this.getPipelinesTopologies();
+                this.setState({ pipelineTopologyName: "", videoName: "", behindProxy: false }, async () =>
+                    await this.getPipelinesTopologies());
             }
             else {
-                alert("An error occurred, please check the console logs");
-                console.log(response);
+                const errorMessageObj = await response.json();
+                alert(`Cannot create tje pipelineTopology: ${errorMessageObj.error.message}`);
             }
         }
         catch (e) {
             console.log(e);
         }
         finally {
-            this.setState({ loading: false });
+            this.setState({ loadingPipelineTopologies: false });
         }
     }
 
@@ -237,19 +254,50 @@ export class FetchData extends Component {
             });
 
             if (response.ok) {
-                this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "" });
-                await this.getLivePipelines();
+                this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "" },
+                    async() => await this.getLivePipelines());           
             }
             else {
-                alert("An error occurred, please check the console logs");
-                console.log(response);
+                const errorMessageObj = await response.json();
+                alert(`Cannot create livepipeline: ${errorMessageObj.error.message}`);
             }
         }
         catch (e) {
             console.log(e);
         }
         finally {
-            this.setState({ loading: false });
+            this.setState({ loadingLivePipelines: false });
+        }
+    }
+
+    async checkStatus(asyncOpUrl) {
+        const token = this.token;
+        
+        try {
+            const asyncResponse = await fetch(asyncOpUrl, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (asyncResponse.ok) {
+                const jsonResp = JSON.parse(await asyncResponse.text());
+                if (jsonResp.status === "Running") {
+                    return await this.checkStatus(asyncOpUrl);
+                } else if (jsonResp.status === "Succeeded") {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                throw new Error(await asyncResponse.text());
+            }
+        }
+        catch (e) {
+            throw new Error(e);
         }
     }
 
@@ -258,14 +306,41 @@ export class FetchData extends Component {
         const action = state === "inactive" ? "activate" : "deactivate";
         const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}/${action}${apiVersion}`;
         try {
-            await fetch(url, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
             });
 
-            await this.getLivePipelines();
+            if (response.ok) {
+                let asyncOpUrl = response.headers.get("azure-asyncoperation");
+                const asyncResponse = await fetch(asyncOpUrl, {
+                    method: 'GET',
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (asyncResponse.ok) {
+                    let result = await this.checkStatus(asyncOpUrl);
+
+                    if (result) {
+                        await this.getLivePipelines();
+                    }
+                    else {
+                        alert("Operation failed, please check the console log.");
+                    }
+                }
+                else {
+                    alert("Operation failed, please check the console log.");
+                    console.log(await response.text());
+                }
+            }
+            else {
+                alert("Operation failed, please check the console log.");
+                console.log(await response.text());
+            }
         }
         catch (e) {
             console.log(e);
@@ -299,7 +374,7 @@ export class FetchData extends Component {
             console.log(e);
         }
         finally {
-            this.setState({ loading: false });
+            this.setState({ loadingPipelineTopologies: false });
         }
     }
 
@@ -330,7 +405,7 @@ export class FetchData extends Component {
             console.log(e);
         }
         finally {
-            this.setState({ loading: false });
+            this.setState({ loadingLivePipelines: false });
         }
     }
 
@@ -366,10 +441,30 @@ export class FetchData extends Component {
     }
 
     setFormData(event) {
+        const elementType = event.target.parentElement.parentElement.name;
         const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
         this.setState({
             ...this.state,
-            [event.target.name] : value
+            [event.target.name]: value
+        }, () => this.validate(elementType));
+    }
+
+    validate(elementType) {
+        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, pipelineTopologyName } = this.state;
+
+        let isLivePipelineValid = false;
+        let isPipelineTopologiesValid = false;
+
+        if (elementType === "livepipeline") {
+            isLivePipelineValid = livePipelineName.length > 0 && rtspUrl.length > 0 && rtspUsername.length > 0 && rtspPassword.length > 0 && livePipelineTopologyName.length > 0;
+        }
+        else {
+            isPipelineTopologiesValid = pipelineTopologyName.length > 0 && videoName.length > 0;
+        }
+
+        this.setState({
+            livePipelineEnabled: isLivePipelineValid,
+            pipelineTopologiesEnabled: isPipelineTopologiesValid
         });
     }
 
@@ -436,7 +531,7 @@ export class FetchData extends Component {
                 </table>
 
                 <h5>Add new</h5>
-                <form onSubmit={(e) => this.createPipelineTopology(e)}>
+                <form name="pipelinetopology" onSubmit={(e) => this.createPipelineTopology(e)}>
                     <fieldset>
                         <label>Behind proxy</label>&nbsp;<input type="checkbox" checked={this.state.behindProxy} name="behindProxy" onChange={(e) => this.setFormData(e)} />
                     </fieldset>
@@ -448,7 +543,7 @@ export class FetchData extends Component {
                         <label>Video Name:</label>&nbsp;
                         <input name="videoName" value={this.state.videoName} onChange={(e) => this.setFormData(e)} />
                     </fieldset>
-                    <button type="submit">Create</button>
+                    <button type="submit" disabled={!this.state.pipelineTopologiesEnabled}>Create</button>
                 </form>
             </div>
         );
@@ -503,14 +598,21 @@ export class FetchData extends Component {
                 </table>
 
                 <h5>Add new</h5>
-                <form onSubmit={(e) => this.createLivePipeline(e)}>
+                <form name="livepipeline" onSubmit={(e) => this.createLivePipeline(e)}>
                     <fieldset>
                         <label>Name:</label>&nbsp;
                         <input name="livePipelineName" value={this.state.livePipelineName} onChange={(e) => this.setFormData(e)} />
                     </fieldset>
                     <fieldset >
-                        <label>Video Name:</label>&nbsp;
-                        <input name="livePipelineTopologyName" value={this.state.livePipelineTopologyName} onChange={(e) => this.setFormData(e)} />
+                        <label>Topology Name:</label>&nbsp;
+                         <select name="livePipelineTopologyName" value={this.state.livePipelineTopologyName} onChange={(e) => this.setFormData(e)}>
+                            <option value="">Select:</option>
+                            {
+                                this.state.pipelineTopologies.map((item, index) =>
+                                    <option key={index} value={item.name}>{item.name}</option>
+                                )
+                            }
+                        </select>
                     </fieldset>
                     <fieldset >
                         <label>rtsp Url:</label>&nbsp;
@@ -524,7 +626,7 @@ export class FetchData extends Component {
                         <label>rtsp Password:</label>&nbsp;
                         <input type="password" name="rtspPassword" value={this.state.rtspPassword} onChange={(e) => this.setFormData(e)} placeholder="*******"/>
                     </fieldset>
-                    <button type="submit">Create</button>
+                    <button type="submit" disabled={!this.state.livePipelineEnabled}>Create</button>
                 </form>
             </div>
         );
@@ -535,11 +637,11 @@ export class FetchData extends Component {
             ? <p><em>Loading Video Analyzers...</em></p>
             : this.renderVideoAnalyzers();
 
-        let pipelineTopologies = this.state.loading
+        let pipelineTopologies = this.state.loadingPipelineTopologies
             ? <p><em>Loading PipelineTopologies... </em></p>
             : this.renderPipelineTopologies();
 
-        let livePipelines = this.state.loading
+        let livePipelines = this.state.loadingPipelineTopologies && this.state.loadingLivePipelines
             ? <p><em>Loading LivePipelines...</em></p>
             : this.renderLivePipelines();
 
