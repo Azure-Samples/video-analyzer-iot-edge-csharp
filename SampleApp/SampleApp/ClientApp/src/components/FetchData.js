@@ -82,7 +82,7 @@ export class FetchData extends Component {
 
     async deletePipelineTopologyOperation(pipelineTopologyName) {
         const token = this.token;
-        const url = `${baseUrl}/${accountName}//pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
+        const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
         try {
             const response = await fetch(url, {
                 method: 'DELETE',
@@ -106,7 +106,7 @@ export class FetchData extends Component {
 
     async createPipelineTopologyOperation(event) {
         event.preventDefault();
-        const { pipelineTopologyName, videoName, behindProxy } = this.state;
+        const { pipelineTopologyName, behindProxy } = this.state;
 
         let body = {
             "Name": pipelineTopologyName,
@@ -132,6 +132,11 @@ export class FetchData extends Component {
                         "name": "rtspPasswordParameter",
                         "type": "SecretString",
                         "description": "rtsp source password parameter"
+                    },
+                    {
+                        "name": "videoNameParameter",
+                        "type": "String",
+                        "description": "video name parameter"
                     }
                 ],
                 "sources": [
@@ -154,10 +159,10 @@ export class FetchData extends Component {
                     {
                         "@type": "#Microsoft.VideoAnalyzer.VideoSink",
                         "name": "videoSink",
-                        "videoName": videoName,
+                        "videoName": "${videoNameParameter}",
                         "videoCreationProperties": {
-                            "title": "Parking Lot (Camera 1)",
-                            "description": "Parking lot south entrance",
+                            "title": "Sample Video",
+                            "description": "Sample Video",
                             "segmentLength": "PT30S"
                         },
                         "inputs": [
@@ -216,7 +221,7 @@ export class FetchData extends Component {
 
     async createLivePipelineOperation(event) {
         event.preventDefault();
-        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName } = this.state;
+        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName } = this.state;
 
         let body = {
             "name": livePipelineName,
@@ -236,6 +241,10 @@ export class FetchData extends Component {
                     {
                         "name": "rtspPasswordParameter",
                         "value": rtspPassword
+                    },
+                    {
+                        "name": "videoNameParameter",
+                        "value": videoName
                     }
                 ]
             }
@@ -254,7 +263,7 @@ export class FetchData extends Component {
             });
 
             if (response.ok) {
-                this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "" },
+                this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "", videoName: "" },
                     async() => await this.getLivePipelines());           
             }
             else {
@@ -341,6 +350,10 @@ export class FetchData extends Component {
                 alert("Operation failed, please check the console log.");
                 console.log(await response.text());
             }
+
+            if (action === "deactivate") {
+                this.deleteVideoPlayer(1);
+            }
         }
         catch (e) {
             console.log(e);
@@ -361,7 +374,7 @@ export class FetchData extends Component {
             var data = [];
 
             if (response.ok) {
-                const jsonResponse = await response.json()
+                const jsonResponse = await response.json();
                 data = jsonResponse.value;
             }
             else {
@@ -392,7 +405,7 @@ export class FetchData extends Component {
             var data = [];
 
             if (response.ok) {
-                const jsonResponse = await response.json()
+                const jsonResponse = await response.json();
                 data = jsonResponse.value;
             }
             else {
@@ -400,6 +413,55 @@ export class FetchData extends Component {
             }
 
             this.setState({ livePipelines: data });
+        }
+        catch (e) {
+            console.log(e);
+        }
+        finally {
+            this.setState({ loadingLivePipelines: false });
+        }
+    }
+
+    async getVideoPlayback(videoName) {
+        const token = this.token;
+        const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
+        const authUrl = `${baseUrl}/${accountName}/videos/${videoName}/listStreamingToken${apiVersion}`;
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            let tunneledRtspUrl = "";
+            let playbackToken = "";
+            if (response.ok) {
+                const jsonResponse = await response.json();
+                tunneledRtspUrl = jsonResponse.properties.streaming.rtspTunnelUrl;
+
+                const responseAuth = await fetch(authUrl, {
+                    method: 'POST',
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (responseAuth.ok) {
+                    const jsonAuthResponse = await responseAuth.json();
+                    playbackToken = jsonAuthResponse.token;
+                }
+                else {
+                    const errorMessageObj = await responseAuth.json();
+                    alert(`Cannot get video playback token: ${errorMessageObj.error.message}`);
+                }
+            }
+            else {
+                const errorMessageObj = await response.json();
+                alert(`Cannot get video playback url: ${errorMessageObj.error.message}`);
+            }
+
+            this.renderVideoPlayer(tunneledRtspUrl, playbackToken);
         }
         catch (e) {
             console.log(e);
@@ -423,7 +485,7 @@ export class FetchData extends Component {
             var data = [];
 
             if (response.ok) {
-                const jsonResponse = await response.json()
+                const jsonResponse = await response.json();
                 data = jsonResponse.value;
             }
             else {
@@ -456,10 +518,10 @@ export class FetchData extends Component {
         let isPipelineTopologiesValid = false;
 
         if (elementType === "livepipeline") {
-            isLivePipelineValid = livePipelineName.length > 0 && rtspUrl.length > 0 && rtspUsername.length > 0 && rtspPassword.length > 0 && livePipelineTopologyName.length > 0;
+            isLivePipelineValid = livePipelineName.length > 0 && rtspUrl.length > 0 && rtspUsername.length > 0 && rtspPassword.length > 0 && livePipelineTopologyName.length > 0 && videoName.length > 0;
         }
         else {
-            isPipelineTopologiesValid = pipelineTopologyName.length > 0 && videoName.length > 0;
+            isPipelineTopologiesValid = pipelineTopologyName.length;
         }
 
         this.setState({
@@ -539,10 +601,6 @@ export class FetchData extends Component {
                         <label>Name:</label>&nbsp;
                         <input name="pipelineTopologyName" value={this.state.pipelineTopologyName} onChange={(e) => this.setFormData(e)} />
                     </fieldset>
-                    <fieldset >
-                        <label>Video Name:</label>&nbsp;
-                        <input name="videoName" value={this.state.videoName} onChange={(e) => this.setFormData(e)} />
-                    </fieldset>
                     <button type="submit" disabled={!this.state.pipelineTopologiesEnabled}>Create</button>
                 </form>
             </div>
@@ -588,7 +646,10 @@ export class FetchData extends Component {
                                             )
                                             :
                                             (
-                                                <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties.state)}>Deactivate</button>
+                                                <div>
+                                                    <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties.state)}>Deactivate</button>
+                                                    <button className="btn btn-primary" onClick={() => this.getVideoPlayback(data.properties.parameters.find(x => x.name === "videoNameParameter").value)}>Play video</button>
+                                                </div>
                                             )
                                         }
                                     </td>
@@ -596,7 +657,11 @@ export class FetchData extends Component {
                             )}
                     </tbody>
                 </table>
-
+                <div>
+                    <div id="videoRootContainer" class='grid-container'>
+                        {/*lva-rtsp-player instances will be added here*/}
+                    </div>
+                </div>
                 <h5>Add new</h5>
                 <form name="livepipeline" onSubmit={(e) => this.createLivePipeline(e)}>
                     <fieldset>
@@ -626,10 +691,40 @@ export class FetchData extends Component {
                         <label>rtsp Password:</label>&nbsp;
                         <input type="password" name="rtspPassword" value={this.state.rtspPassword} onChange={(e) => this.setFormData(e)} placeholder="*******"/>
                     </fieldset>
+                    <fieldset >
+                        <label>Video Name:</label>&nbsp;
+                        <input name="videoName" value={this.state.videoName} onChange={(e) => this.setFormData(e)} placeholder="SampleVideo" />
+                    </fieldset>
                     <button type="submit" disabled={!this.state.livePipelineEnabled}>Create</button>
                 </form>
             </div>
         );
+    }
+
+    renderVideoPlayer(wsHost, websocketToken) {
+        let videoId = 0;
+
+        // Dynamically create and add instances of lva-rtsp-player based on input fields. A dummy value for rtspUri is required.
+        const createVideo = (id, webSocketUri, authorizationToken) => {
+            let player = document.createElement('lva-rtsp-player')
+            player.id = "video" + id.toString();
+            player.webSocketUri = webSocketUri;
+            player.rtspUri = "rtsp://localhost:8554/test";
+            player.style.width = "720px";
+            player.style.height = "405px";
+            player.authorizationToken = authorizationToken;
+            let videoRootContainer = document.getElementById("videoRootContainer");
+            videoRootContainer.append(player);
+        }
+
+        createVideo(videoId, wsHost, websocketToken);
+    }
+
+    deleteVideoPlayer(id) {
+        let videoRootContainer = document.getElementById("videoRootContainer");
+        for (var i = 0; i < videoRootContainer.children.length; i++) {
+            videoRootContainer.removeChild(videoRootContainer.children.item(i));
+        }
     }
 
     render() {
