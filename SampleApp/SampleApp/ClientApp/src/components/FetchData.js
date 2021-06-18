@@ -352,7 +352,7 @@ export class FetchData extends Component {
             }
 
             if (action === "deactivate") {
-                this.deleteVideoPlayer(1);
+                this.deleteVideoPlayer(livePipeline);
             }
         }
         catch (e) {
@@ -422,7 +422,7 @@ export class FetchData extends Component {
         }
     }
 
-    async getVideoPlayback(videoName) {
+    async getVideoPlayback(videoName, pipelineName) {
         const token = this.token;
         const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
         const authUrl = `${baseUrl}/${accountName}/videos/${videoName}/listStreamingToken${apiVersion}`;
@@ -461,7 +461,7 @@ export class FetchData extends Component {
                 alert(`Cannot get video playback url: ${errorMessageObj.error.message}`);
             }
 
-            this.renderVideoPlayer(tunneledRtspUrl, playbackToken);
+            this.renderVideoPlayer(tunneledRtspUrl, playbackToken, pipelineName);
         }
         catch (e) {
             console.log(e);
@@ -648,20 +648,20 @@ export class FetchData extends Component {
                                             (
                                                 <div>
                                                     <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties.state)}>Deactivate</button>
-                                                    <button className="btn btn-primary" onClick={() => this.getVideoPlayback(data.properties.parameters.find(x => x.name === "videoNameParameter").value)}>Play video</button>
+                                                    <button className="btn btn-primary" onClick={() => this.getVideoPlayback(data.properties.parameters.find(x => x.name === "videoNameParameter").value, data.name)}>Play video</button>
                                                 </div>
                                             )
                                         }
+                                        <div>
+                                            <div id={"videoRootContainer" + data.name} class='grid-container'>
+                                                {/*lva-rtsp-player instances will be added here*/}
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
                     </tbody>
                 </table>
-                <div>
-                    <div id="videoRootContainer" class='grid-container'>
-                        {/*lva-rtsp-player instances will be added here*/}
-                    </div>
-                </div>
                 <h5>Add new</h5>
                 <form name="livepipeline" onSubmit={(e) => this.createLivePipeline(e)}>
                     <fieldset>
@@ -701,7 +701,7 @@ export class FetchData extends Component {
         );
     }
 
-    renderVideoPlayer(wsHost, websocketToken) {
+    renderVideoPlayer(wsHost, websocketToken, pipelineName) {
         let videoId = 0;
 
         // Dynamically create and add instances of lva-rtsp-player based on input fields. A dummy value for rtspUri is required.
@@ -713,17 +713,17 @@ export class FetchData extends Component {
             player.style.width = "720px";
             player.style.height = "405px";
             player.authorizationToken = authorizationToken;
-            let videoRootContainer = document.getElementById("videoRootContainer");
+            let videoRootContainer = document.getElementById("videoRootContainer" + pipelineName);
             videoRootContainer.append(player);
         }
 
-        createVideo(videoId, wsHost, websocketToken);
+        createVideo(videoId++, wsHost, websocketToken);
     }
 
-    deleteVideoPlayer(id) {
-        let videoRootContainer = document.getElementById("videoRootContainer");
-        for (var i = 0; i < videoRootContainer.children.length; i++) {
-            videoRootContainer.removeChild(videoRootContainer.children.item(i));
+    deleteVideoPlayer(pipelineName) {
+        let videoRootContainer = document.getElementById("videoRootContainer" + pipelineName);
+        while (videoRootContainer.firstChild) {
+            videoRootContainer.firstChild.remove();
         }
     }
 
