@@ -613,19 +613,18 @@ export class FetchData extends Component {
             <div>
                 <h3>LivePipelines</h3>
                 <table className='table table-striped' aria-labelledby="tabelLabel">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Topology</th>
-                            <th>State</th>
-                            <th>Parameters</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
                     <tbody>
                         {
                             livePipelines.map((data, index) =>
+                                <div>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Topology</th>
+                                    <th>State</th>
+                                    <th>Parameters</th>
+                                    <th>Action</th>
+                                </tr>
                                 <tr key={index}>
                                     <td>{data.name}</td>
                                     <td>{data.properties.description}</td>
@@ -652,13 +651,19 @@ export class FetchData extends Component {
                                                 </div>
                                             )
                                         }
-                                        <div>
-                                            <div id={"videoRootContainer" + data.name} class='grid-container'>
-                                                {/*lva-rtsp-player instances will be added here*/}
-                                            </div>
-                                        </div>
                                     </td>
-                                </tr>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan="6">
+                                            <div>
+                                                <div id={"videoRootContainer" + data.name}>
+                                                    {/*lva-rtsp-player instances will be added here*/}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr><td colSpan="6"></td></tr>
+                                </div>
                             )}
                     </tbody>
                 </table>
