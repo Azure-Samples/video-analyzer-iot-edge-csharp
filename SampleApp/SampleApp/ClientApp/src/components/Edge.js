@@ -10,8 +10,8 @@ const ioTHubDeviceId = "clientwebappdevice";
 const ioTHubArmId = "/subscriptions/86fe5e45-3696-4c0e-b88a-cf350e31ee68/resourceGroups/client-web-app/providers/Microsoft.Devices/IotHubs/clientwebappiothub";
 const ioTHubUserAssignedManagedIdentityArmId = "/subscriptions/86fe5e45-3696-4c0e-b88a-cf350e31ee68/resourceGroups/client-web-app/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clientwebappiothubidentity";
 
-export class FetchData extends Component {
-    static displayName = FetchData.name;
+export class Edge extends Component {
+    static displayName = Edge.name;
 
     constructor(props) {
         super(props);
@@ -747,16 +747,8 @@ export class FetchData extends Component {
 
         return (
             <div>
-                <h1 id="tabelLabel" >Video Analyzers</h1>
-                <p>This component demonstrates fetching Video Analyzers.</p>
-                {videoAnalyzers}
-                <hr />
-                <br/>
-                {pipelineTopologies}
-                <hr />
-                <br />
-                {livePipelines}
-                <hr />
+                <h1 id="tabelLabel" >Edge device</h1>
+                <p>This component demonstrates fetching</p>
                 <br />
             </div>
         );

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Newtonsoft;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
+using SampleApp.Models;
+using Microsoft.Extensions.Options;
 
 namespace SampleApp.Controllers
 {
@@ -16,12 +18,21 @@ namespace SampleApp.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
-        private readonly IConfiguration Configuration;
+        private readonly IOptions<AuthModel> AuthSettings;
+        private readonly IOptions<ClientModel> ClientSettings;
 
-        public AuthController(ILogger<AuthController> logger, IConfiguration configuration)
+        public AuthController(ILogger<AuthController> logger, IOptions<AuthModel> authModel, IOptions<ClientModel> clientModel)
         {
             _logger = logger;
-            Configuration = configuration;
+            AuthSettings = authModel;
+            ClientSettings = clientModel;
+        }
+
+        [HttpGet]
+        public IActionResult GetConfig()
+        {
+            var result = ClientSettings.Value;
+            return Ok(result);
         }
 
         [HttpGet]
@@ -29,12 +40,12 @@ namespace SampleApp.Controllers
         {
             using var client = new HttpClient();
             client.BaseAddress = new Uri("https://login.windows.net");
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/{Configuration["Auth:tenantId"]}/oauth2/token");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/{AuthSettings.Value.TenantId}/oauth2/token");
 
             var keyValues = new List<KeyValuePair<string, string>>() {
                 new KeyValuePair<string, string>("resource", "https://management.core.windows.net/"),
-                new KeyValuePair<string, string>("client_id", Configuration["Auth:clientId"]),
-                new KeyValuePair<string, string>("client_secret", Configuration["Auth:clientSecret"]),
+                new KeyValuePair<string, string>("client_id", AuthSettings.Value.ClientId),
+                new KeyValuePair<string, string>("client_secret", AuthSettings.Value.ClientSecret),
                 new KeyValuePair<string, string>("grant_type", "client_credentials") 
             };
 

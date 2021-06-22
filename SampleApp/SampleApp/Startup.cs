@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SampleApp.Models;
 
 namespace SampleApp
 {
@@ -28,6 +29,9 @@ namespace SampleApp
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.Configure<AuthModel>(Configuration.GetSection("Auth"));
+            services.Configure<ClientModel>(Configuration.GetSection("Client"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
