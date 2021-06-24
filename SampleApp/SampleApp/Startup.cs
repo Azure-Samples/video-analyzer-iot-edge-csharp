@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+//  <copyright company="Microsoft Corporation">
+//      Copyright (C) Microsoft Corporation. All rights reserved.
+//  </copyright>
+// -----------------------------------------------------------------------
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -5,6 +11,7 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SampleApp.Helpers;
 using SampleApp.Models;
 
 namespace SampleApp
@@ -31,7 +38,8 @@ namespace SampleApp
             });
 
             services.Configure<AuthModel>(Configuration.GetSection("Auth"));
-            services.Configure<ClientModel>(Configuration.GetSection("Client"));
+            services.Configure<ClientModel>(Configuration.GetSection("CloudClient"));
+            services.Configure<VideoAnalyzerClientConfiguration>(Configuration.GetSection("AvaArmClient"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

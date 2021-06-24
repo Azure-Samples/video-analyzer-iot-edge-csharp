@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+//  <copyright company="Microsoft Corporation">
+//      Copyright (C) Microsoft Corporation. All rights reserved.
+//  </copyright>
+// -----------------------------------------------------------------------
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

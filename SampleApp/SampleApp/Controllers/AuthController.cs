@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// -----------------------------------------------------------------------
+//  <copyright company="Microsoft Corporation">
+//      Copyright (C) Microsoft Corporation. All rights reserved.
+//  </copyright>
+// -----------------------------------------------------------------------
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;

@@ -84,6 +84,28 @@ export class Cloud extends Component {
         }
     }
 
+    async deleteVideoOperation(videoName) {
+        const { baseUrl, apiVersion, accountName } = this.state.appSettings;
+        const token = this.token;
+        const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorMessageObj = await response.json();
+                console.log(`Cannot delete video ${videoName}: ${errorMessageObj.error.message}`);
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+
     async deletePipelineTopologyOperation(pipelineTopologyName) {
         const { baseUrl, apiVersion, accountName } = this.state.appSettings;
         const token = this.token;
@@ -317,10 +339,11 @@ export class Cloud extends Component {
         }
     }
 
-    async changeStateLivePipelineOperation(livePipeline, state) {
+    async changeStateLivePipelineOperation(livePipeline, properties) {
         const { baseUrl, accountName, apiVersion } = this.state.appSettings;
         const token = this.token;
-        const action = state === "inactive" ? "activate" : "deactivate";
+        const action = properties.state === "inactive" ? "activate" : "deactivate";
+        
         const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}/${action}${apiVersion}`;
         try {
             const response = await fetch(url, {
@@ -361,6 +384,8 @@ export class Cloud extends Component {
 
             if (action === "deactivate") {
                 this.deleteVideoPlayer(livePipeline);
+                const videoName = properties.parameters.find(x => x.name === "videoNameParameter").value;
+                this.deleteVideoOperation(videoName);
             }
         }
         catch (e) {
@@ -653,12 +678,12 @@ export class Cloud extends Component {
                                         <button className="btn btn-primary" onClick={() => this.deleteLivePipeline(data.name)}>Delete</button><br /><br />
                                         {
                                             data.properties.state === "inactive" ? (
-                                                <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties.state)}>Activate</button>
+                                                <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties)}>Activate</button>
                                             )
                                             :
                                             (
                                                 <div>
-                                                            <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties.state)}>Deactivate</button><br /><br />
+                                                    <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties)}>Deactivate</button><br /><br />
                                                     <button className="btn btn-primary" onClick={() => this.getVideoPlayback(data.properties.parameters.find(x => x.name === "videoNameParameter").value, data.name)}>Play video</button>
                                                 </div>
                                             )
