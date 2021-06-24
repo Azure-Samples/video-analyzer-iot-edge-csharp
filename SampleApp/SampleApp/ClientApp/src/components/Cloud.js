@@ -558,7 +558,7 @@ export class Cloud extends Component {
             isLivePipelineValid = livePipelineName.length > 0 && rtspUrl.length > 0 && rtspUsername.length > 0 && rtspPassword.length > 0 && livePipelineTopologyName.length > 0 && videoName.length > 0;
         }
         else {
-            isPipelineTopologiesValid = pipelineTopologyName.length;
+            isPipelineTopologiesValid = pipelineTopologyName !== undefined && pipelineTopologyName.length > 0;
         }
 
         this.setState({
