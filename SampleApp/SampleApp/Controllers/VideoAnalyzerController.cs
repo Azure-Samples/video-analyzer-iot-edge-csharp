@@ -16,8 +16,8 @@ using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
 using SampleApp.Models;
 using Microsoft.Extensions.Options;
-using Microsoft.Media.LiveVideoAnalytics.Apis.Client.MediaGraphManager.RP20210501privatepreview;
-using Microsoft.Media.LiveVideoAnalytics.Apis.Client.MediaGraphManager.RP20210501privatepreview.Models;
+using Microsoft.Azure.Devices;
+using Azure.Media.VideoAnalyzer.Edge.Models;
 using SampleApp.Helpers;
 
 namespace SampleApp.Controllers
@@ -27,15 +27,14 @@ namespace SampleApp.Controllers
     public class VideoAnalyzerController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
-        private readonly IOptions<VideoAnalyzerClientConfiguration> VideoAnalyzerClientConfiguration;
-        private readonly VideoAnalyzerClient VideoAnalyzerClient;
-
+        private readonly VideoAnalyzerClientConfiguration VideoAnalyzerClientConfiguration;
+        private readonly ServiceClient EdgeClient;
 
         public VideoAnalyzerController(ILogger<AuthController> logger, IOptions<VideoAnalyzerClientConfiguration> clientConfiguration)
         {
             _logger = logger;
-            VideoAnalyzerClientConfiguration = clientConfiguration;
-            VideoAnalyzerClient = VideoAnalyzerClientFactory.CreateAsync(clientConfiguration.Value).Result;
+            VideoAnalyzerClientConfiguration = clientConfiguration.Value;
+            EdgeClient = ServiceClient.CreateFromConnectionString(VideoAnalyzerClientConfiguration.IotHubConnectionString);
         }
 
         [HttpGet]
@@ -43,8 +42,8 @@ namespace SampleApp.Controllers
         {
             try
             {
-                var response = await VideoAnalyzerClient.GetAllPipelineTopologyAsync();
-                return Ok(response);
+                
+                return Ok();
             }
             catch (Exception ex)
             {

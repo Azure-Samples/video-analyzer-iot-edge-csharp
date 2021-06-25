@@ -10,12 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Media.VideoAnalyzer.Edge" Version="1.0.0-privatepreview.1" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.14" />
-    <PackageReference Include="Microsoft.Media.LiveVideoAnalytics.Apis.Client.MediaGraphManager.RP20210501privatepreview" Version="1.0.16343039" />
-    <PackageReference Include="Microsoft.Media.LiveVideoAnalytics.Apis.Client.Videos.RP20210501privatepreview" Version="1.0.16353048" />
+    <PackageReference Include="Microsoft.Azure.Devices" Version="1.35.0-preview-001" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime.Azure.Authentication" Version="2.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Polly" Version="7.2.2" />
   </ItemGroup>
 
   <ItemGroup>

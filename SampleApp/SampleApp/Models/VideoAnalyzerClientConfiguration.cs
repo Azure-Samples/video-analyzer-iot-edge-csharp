@@ -1,55 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// -----------------------------------------------------------------------
+//  <copyright company="Microsoft Corporation">
+//      Copyright (C) Microsoft Corporation. All rights reserved.
+//  </copyright>
+// -----------------------------------------------------------------------
 
 namespace SampleApp.Models
 {
     public class VideoAnalyzerClientConfiguration
     {
-        /// <summary>
-        /// Gets the authority endpoint base uri for Ava AAD app.
-        /// </summary>
-        public Uri AvaAadAuthorityEndpointBaseUri { get; set; }
 
         /// <summary>
-        /// Gets the tenant id for Azure Video Analyzer.
+        /// The IotHubConnectionString.
         /// </summary>
-        public string AvaTenantId { get; set; }
+        public string IotHubConnectionString { get; set; }
 
         /// <summary>
-        /// Gets the AAD client id for Azure Video Analyzer.
+        /// The device id.
         /// </summary>
-        public string AvaClientAadClientId { get; set; }
+        public string DeviceId { get; set; }
 
         /// <summary>
-        /// Gets the AAD certificate for Azure Video Analyzer.
+        /// The module id
         /// </summary>
-        public string AvaClientAadSecret { get; set; }
-
-        /// <summary>
-        /// Gets the AAD resource for Azure Video Analyzer.
-        /// </summary>
-        public string AvaAadResource { get; set; }
-
-        /// <summary>
-        /// Gets the AVA media account name.
-        /// </summary>
-        public string AvaAccountName { get; set; }
-
-        /// <summary>
-        /// Gets the AVA media account resource group name.
-        /// </summary>
-        public string AvaAccountResourceGroupName { get; set; }
-
-        /// <summary>
-        /// Gets the AVA media account subscription id.
-        /// </summary>
-        public string AvaAccountSubscriptionId { get; set; }
-
-        /// <summary>
-        /// Gets the AVA ARM endpoint.
-        /// </summary>
-        public Uri AvaArmEndpoint { get; set; }
+        public string ModuleId { get; set; }
     }
 }

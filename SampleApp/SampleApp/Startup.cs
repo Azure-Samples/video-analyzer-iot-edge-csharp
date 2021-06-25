@@ -39,7 +39,7 @@ namespace SampleApp
 
             services.Configure<AuthModel>(Configuration.GetSection("Auth"));
             services.Configure<ClientModel>(Configuration.GetSection("CloudClient"));
-            services.Configure<VideoAnalyzerClientConfiguration>(Configuration.GetSection("AvaArmClient"));
+            services.Configure<VideoAnalyzerClientConfiguration>(Configuration.GetSection("EdgeClient"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
