@@ -9,16 +9,16 @@ using System.Collections.Generic;
 
 namespace SampleApp.Helpers
 {
-	/// <summary>
-	/// A helper class to manage LivePipeline operations.
-	/// </summary>
-	public class LivePipelineManager
+    /// <summary>
+    /// A helper class to manage LivePipeline operations.
+    /// </summary>
+    public static class Builder
 	{
-        public PipelineTopology Build()
+        public static PipelineTopology BuildPipelineTopology(string pipelineTopologyName)
         {
             var properties = new PipelineTopologyProperties()
             {
-                Description = "Analyzing live video to detect motion and emit events"
+                Description = "Sample pipeline topology"
             };
 
             SetParameters(properties);
@@ -26,7 +26,7 @@ namespace SampleApp.Helpers
             SetProcessors(properties);
             SetSinks(properties);
 
-            return new PipelineTopology("MotionDetection")
+            return new PipelineTopology(pipelineTopologyName)
             {
                 Properties = properties
             };
@@ -34,7 +34,7 @@ namespace SampleApp.Helpers
         }
 
         // Add parameters to Topology
-        private void SetParameters(PipelineTopologyProperties properties)
+        private static void SetParameters(PipelineTopologyProperties properties)
         {
             properties.Parameters.Add(
                 new ParameterDeclaration("rtspUserName", ParameterType.String)
@@ -65,7 +65,7 @@ namespace SampleApp.Helpers
         }
 
         // Add sources to Topology
-        private void SetSources(PipelineTopologyProperties properties)
+        private static void SetSources(PipelineTopologyProperties properties)
         {
             properties.Sources.Add(new RtspSource("rtspSource",
                 new UnsecuredEndpoint("${rtspUrl}")
@@ -77,7 +77,7 @@ namespace SampleApp.Helpers
         }
 
         // Add processors to Topology
-        private void SetProcessors(PipelineTopologyProperties properties)
+        private static void SetProcessors(PipelineTopologyProperties properties)
         {
             properties.Processors.Add(
                 new MotionDetectionProcessor("motionDetection", new List<NodeInput> { { new NodeInput("rtspSource") } })
@@ -88,7 +88,7 @@ namespace SampleApp.Helpers
         }
 
         // Add sinks to Topology
-        private void SetSinks(PipelineTopologyProperties properties)
+        private static void SetSinks(PipelineTopologyProperties properties)
         {
             properties.Sinks.Add(
                 new IotHubMessageSink(
@@ -98,6 +98,29 @@ namespace SampleApp.Helpers
                     },
                     "inferenceOutput")
                 );
+        }
+
+        public static LivePipeline BuildLivePipepine(
+            string livePipelineName,
+            string pipelineTopologyName,
+            string url,
+            string userName,
+            string password)
+        {
+            var result = new LivePipeline(livePipelineName)
+            {
+                Properties = new LivePipelineProperties
+                {
+                    TopologyName = pipelineTopologyName,
+                    Description = "Sample pipeline description"
+                }
+            };
+
+            result.Properties.Parameters.Add(new ParameterDefinition("rtspUrl") { Value = url });
+            result.Properties.Parameters.Add(new ParameterDefinition("rtspUserName") { Value = userName });
+            result.Properties.Parameters.Add(new ParameterDefinition("rtspPassword") { Value = password });
+           
+            return result;
         }
     }
 }

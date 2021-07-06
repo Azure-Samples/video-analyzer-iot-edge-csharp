@@ -23,5 +23,15 @@ namespace SampleApp.Models
         /// The module id
         /// </summary>
         public string ModuleId { get; set; }
+
+        /// <summary>
+        /// The Builtin Endpoint
+        /// </summary>
+        public string BuiltinEndpoint { get; set; }
+
+        /// <summary>
+        /// The iot hub name
+        /// </summary>
+        public string IotHubName { get; set; }
     }
 }

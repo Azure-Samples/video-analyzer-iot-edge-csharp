@@ -1,14 +1,5 @@
 ﻿import React, { Component } from 'react';
-
-const armEndpoint = "management.azure.com";
-const subscription = "86fe5e45-3696-4c0e-b88a-cf350e31ee68";
-const resourceGroup = "client-web-app";
-const accountName = "clientwebapp";
-const apiVersion = "?api-version=2021-05-01-privatepreview";
-const baseUrl = `https://${armEndpoint}/subscriptions/${subscription}/resourceGroups/${resourceGroup}/providers/Microsoft.Media/videoAnalyzers`;
-const ioTHubDeviceId = "clientwebappdevice";
-const ioTHubArmId = "/subscriptions/86fe5e45-3696-4c0e-b88a-cf350e31ee68/resourceGroups/client-web-app/providers/Microsoft.Devices/IotHubs/clientwebappiothub";
-const ioTHubUserAssignedManagedIdentityArmId = "/subscriptions/86fe5e45-3696-4c0e-b88a-cf350e31ee68/resourceGroups/client-web-app/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clientwebappiothubidentity";
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
 export class Edge extends Component {
     static displayName = Edge.name;
@@ -16,7 +7,6 @@ export class Edge extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            videoAnalyzers: [],
             pipelineTopologies: [],
             livePipelines: [],
             loading: true,
@@ -31,7 +21,9 @@ export class Edge extends Component {
             livePipelineTopologyName: "",
             livePipelineState: "inactive",
             livePipelineEnabled: false,
-            pipelineTopologiesEnabled: false
+            pipelineTopologiesEnabled: false,
+            connection: null,
+            events: []
         };
         this.token = null;
         this.deletePipelineTopology = this.deletePipelineTopologyOperation.bind(this);
@@ -42,10 +34,28 @@ export class Edge extends Component {
     }
 
     async componentDidMount() {
-        await this.getToken();
-        await this.listVideoAnalyzers();
         await this.getPipelinesTopologies();
         await this.getLivePipelines();
+        await this.initConnection();
+    }
+
+    async initConnection() {
+        const connection = new HubConnectionBuilder()
+            .withUrl("/eventhub")
+            .configureLogging(LogLevel.Error)
+            .build();
+
+        connection.on("ReceivedNewEvent", (eventData) => {
+            const { events } = this.state;
+
+            events.push(eventData);
+            console.log('Added event');
+
+            this.setState({ events: events});
+        });
+
+        connection.start();
+        this.setState({ connection: connection });
     }
 
     async getToken() {
@@ -58,7 +68,7 @@ export class Edge extends Component {
 
     async deleteLivePipelineOperation(livePipeline) {
         const token = this.token;
-        const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}${apiVersion}`;
+        const url = '';
         try {
             const response = await fetch(url, {
                 method: 'DELETE',
@@ -81,14 +91,10 @@ export class Edge extends Component {
     }
 
     async deletePipelineTopologyOperation(pipelineTopologyName) {
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
+        const url = `/VideoAnalyzer/PipelineTopologyDelete?pipelineTopologyName=${pipelineTopologyName}`;
         try {
             const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                method: 'DELETE'
             });
 
             if (response.ok) {
@@ -108,98 +114,13 @@ export class Edge extends Component {
         event.preventDefault();
         const { pipelineTopologyName, behindProxy } = this.state;
 
-        let body = {
-            "Name": pipelineTopologyName,
-            "Kind": "liveUltraLowLatency",
-            "Sku": {
-                "Name": "S1",
-                "Tier": "Standard"
-            },
-            "Properties": {
-                "description": "pipeline topology test description",
-                "parameters": [
-                    {
-                        "name": "rtspUrlParameter",
-                        "type": "String",
-                        "description": "rtsp source url parameter"
-                    },
-                    {
-                        "name": "rtspUsernameParameter",
-                        "type": "String",
-                        "description": "rtsp source username parameter"
-                    },
-                    {
-                        "name": "rtspPasswordParameter",
-                        "type": "SecretString",
-                        "description": "rtsp source password parameter"
-                    },
-                    {
-                        "name": "videoNameParameter",
-                        "type": "String",
-                        "description": "video name parameter"
-                    }
-                ],
-                "sources": [
-                    {
-                        "@type": "#Microsoft.VideoAnalyzer.RtspSource",
-                        "name": "rtspSource",
-                        "transport": "tcp",
-                        "endpoint": {
-                            "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
-                            "url": "${rtspUrlParameter}",
-                            "credentials": {
-                                "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
-                                "username": "${rtspUsernameParameter}",
-                                "password": "${rtspPasswordParameter}"
-                            }
-                        }
-                    }
-                ],
-                "sinks": [
-                    {
-                        "@type": "#Microsoft.VideoAnalyzer.VideoSink",
-                        "name": "videoSink",
-                        "videoName": "${videoNameParameter}",
-                        "videoCreationProperties": {
-                            "title": "Sample Video",
-                            "description": "Sample Video",
-                            "segmentLength": "PT30S"
-                        },
-                        "inputs": [
-                            {
-                                "nodeName": "rtspSource"
-                            }
-                        ]
-                    }
-                ]
-            }
-        };
-
-        if (behindProxy) {
-            let source = body.Properties.sources.pop();
-            let endpoint = source.endpoint;
-            source.endpoint = {
-                ...endpoint, "tunnel": {
-                    "@type": "#Microsoft.VideoAnalyzer.IotSecureDeviceRemoteTunnel",
-                    "deviceId": ioTHubDeviceId,
-                    "iotHubArmId": ioTHubArmId,
-                    "userAssignedManagedIdentityArmId": ioTHubUserAssignedManagedIdentityArmId
-                }
-            };
-
-            body.Properties.sources.push(source);
-        }
-
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
+        const url = `/VideoAnalyzer/PipelineTopologySet?pipelineTopologyName=${pipelineTopologyName}`;
         try {
             const response = await fetch(url, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
-                    "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
+                }
             });
 
             if (response.ok) {
@@ -222,44 +143,11 @@ export class Edge extends Component {
     async createLivePipelineOperation(event) {
         event.preventDefault();
         const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName } = this.state;
-
-        let body = {
-            "name": livePipelineName,
-            "properties": {
-                "topologyName": livePipelineTopologyName,
-                "description": "live pipeline test description",
-                "bitrateKbps": 500,
-                "parameters": [
-                    {
-                        "name": "rtspUrlParameter",
-                        "value": rtspUrl
-                    },
-                    {
-                        "name": "rtspUsernameParameter",
-                        "value": rtspUsername
-                    },
-                    {
-                        "name": "rtspPasswordParameter",
-                        "value": rtspPassword
-                    },
-                    {
-                        "name": "videoNameParameter",
-                        "value": videoName
-                    }
-                ]
-            }
-        }
-
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/livePipelines/${livePipelineName}${apiVersion}`;
+        const url = `/VideoAnalyzer/LivePipelineSet?pipelineTopologyName=${livePipelineTopologyName}&livePipelineName=${livePipelineName}&username=${rtspUsername}&password=${rtspPassword}&url=${rtspUrl}`;
+        
         try {
             const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
+                method: 'POST'
             });
 
             if (response.ok) {
@@ -311,48 +199,28 @@ export class Edge extends Component {
     }
 
     async changeStateLivePipelineOperation(livePipeline, state) {
-        const token = this.token;
-        const action = state === "inactive" ? "activate" : "deactivate";
-        const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}/${action}${apiVersion}`;
+        const action = state === "Inactive" ? "Activate" : "Deactivate";
+        const url = `/VideoAnalyzer/LivePipeline${action}?livePipelineName=${livePipeline}`;
+        
         try {
             const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                method: 'POST'
             });
 
             if (response.ok) {
-                let asyncOpUrl = response.headers.get("azure-asyncoperation");
-                const asyncResponse = await fetch(asyncOpUrl, {
-                    method: 'GET',
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (asyncResponse.ok) {
-                    let result = await this.checkStatus(asyncOpUrl);
-
-                    if (result) {
-                        await this.getLivePipelines();
-                    }
-                    else {
-                        alert("Operation failed, please check the console log.");
-                    }
-                }
-                else {
-                    alert("Operation failed, please check the console log.");
-                    console.log(await response.text());
-                }
+                await this.getLivePipelines();
             }
             else {
                 alert("Operation failed, please check the console log.");
                 console.log(await response.text());
             }
 
-            if (action === "deactivate") {
-                this.deleteVideoPlayer(livePipeline);
+            if (action === "Deactivate") {
+                await this.stopToEvent();
+                this.setState({ events: [] });
+            }
+            else {
+                await this.listenToEvent();
             }
         }
         catch (e) {
@@ -361,21 +229,17 @@ export class Edge extends Component {
     }
 
     async getPipelinesTopologies() {
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/pipelineTopologies${apiVersion}`;
+        const url = '/VideoAnalyzer/PipelineTopologyList';
         try {
             const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                method: 'GET'
             });
 
             var data = [];
 
             if (response.ok) {
                 const jsonResponse = await response.json();
-                data = jsonResponse.value;
+                data = jsonResponse;
             }
             else {
                 console.log(response.statusText);
@@ -392,21 +256,17 @@ export class Edge extends Component {
     }
 
     async getLivePipelines() {
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/livePipelines${apiVersion}`;
+        const url = '/VideoAnalyzer/LivePipelineList';
         try {
             const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                method: 'GET'
             });
 
             var data = [];
 
             if (response.ok) {
                 const jsonResponse = await response.json();
-                data = jsonResponse.value;
+                data = JSON.parse(jsonResponse);
             }
             else {
                 console.log(response.statusText);
@@ -424,8 +284,8 @@ export class Edge extends Component {
 
     async getVideoPlayback(videoName, pipelineName) {
         const token = this.token;
-        const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
-        const authUrl = `${baseUrl}/${accountName}/videos/${videoName}/listStreamingToken${apiVersion}`;
+        const url = '';
+        const authUrl = '';
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -471,34 +331,35 @@ export class Edge extends Component {
         }
     }
 
-    async listVideoAnalyzers() {
-        const token = this.token;
-        const url = `${baseUrl}${apiVersion}`;
+    async listenToEvent() {
+        const url = '/VideoAnalyzer/ListenToEvents';
         try {
             const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                method: 'GET'
             });
 
-            var data = [];
-
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                data = jsonResponse.value;
-            }
-            else {
+            if (!response.ok) {
                 console.log(response.statusText);
             }
-
-            this.setState({ videoAnalyzers: data });
         }
         catch (e) {
             console.log(e);
         }
-        finally {
-            this.setState({ loading: false });
+    }
+
+    async stopToEvent() {
+        const url = '/VideoAnalyzer/StopListeningToEvents';
+        try {
+            const response = await fetch(url, {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                console.log(response.statusText);
+            }
+        }
+        catch (e) {
+            console.log(e);
         }
     }
 
@@ -528,33 +389,6 @@ export class Edge extends Component {
             livePipelineEnabled: isLivePipelineValid,
             pipelineTopologiesEnabled: isPipelineTopologiesValid
         });
-    }
-
-    renderVideoAnalyzers() {
-        const { videoAnalyzers } = this.state;
-        return (
-            <table className='table table-striped' aria-labelledby="tabelLabel">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Id</th>
-                        <th>Location</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        videoAnalyzers.map((data, index) =>
-                            <tr key={index}>
-                                <td>{data.name}</td>
-                                <td>{data.id}</td>
-                                <td>{data.location}</td>
-                                <td>{data.type}</td>
-                            </tr>
-                        )}
-                </tbody>
-            </table>
-        );
     }
 
     renderPipelineTopologies() {
@@ -640,18 +474,37 @@ export class Edge extends Component {
                                     <td>
                                         <button className="btn btn-primary" onClick={() => this.deleteLivePipeline(data.name)}>Delete</button><br /><br />
                                         {
-                                            data.properties.state === "inactive" ? (
+                                            data.properties.state === "Inactive" ? (
                                                 <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties.state)}>Activate</button>
                                             )
                                             :
                                             (
                                                 <div>
-                                                            <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties.state)}>Deactivate</button><br /><br />
-                                                    <button className="btn btn-primary" onClick={() => this.getVideoPlayback(data.properties.parameters.find(x => x.name === "videoNameParameter").value, data.name)}>Play video</button>
+                                                    <button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, data.properties.state)}>Deactivate</button><br /><br />
+                                                            <button className="btn btn-primary" onClick={() => this.getVideoPlayback(data.properties.parameters.find(x => x.name === "videoNameParameter").value, data.name)}>Play video</button>
+                                                            {/*<button className="btn btn-primary" onClick={() => this.listenToEvent()}>Listen</button><br /><br />*/}
+                                                            {/*<button className="btn btn-primary" onClick={() => this.stopToEvent()}>Stop</button>*/}
                                                 </div>
                                             )
                                         }
+                                            {/*<button className="btn btn-primary" onClick={() => this.deleteLivePipeline(data.name)}>{data.na}Delete</button><br /><br />*/}
+                                            {/*<button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, 'inactive')}>Activate</button>*/}
+                                            {/*<button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, 'active')}>Deactivate</button><br /><br />*/}
+                                            {/*<button className="btn btn-primary" onClick={() => this.getVideoPlayback(data.properties.parameters.find(x => x.name === "videoNameParameter").value, data.name)}>Play video</button>*/}
+                                            {/*<button className="btn btn-primary" onClick={() => this.listenToEvent()}>Listen</button><br /><br />*/}
+                                            {/*<button className="btn btn-primary" onClick={() => this.stopToEvent()}>Stop</button><br /><br />*/}
                                     </td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan="6">
+                                            <div>
+                                                <ul>
+                                                    {this.state.events.map((p, i) =>
+                                                        <li key={i}>{p}</li>
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td colSpan="6">
@@ -733,10 +586,6 @@ export class Edge extends Component {
     }
 
     render() {
-        let videoAnalyzers = this.state.loading
-            ? <p><em>Loading Video Analyzers...</em></p>
-            : this.renderVideoAnalyzers();
-
         let pipelineTopologies = this.state.loadingPipelineTopologies
             ? <p><em>Loading PipelineTopologies... </em></p>
             : this.renderPipelineTopologies();
@@ -747,8 +596,13 @@ export class Edge extends Component {
 
         return (
             <div>
-                <h1 id="tabelLabel" >Edge device</h1>
-                <p>This component demonstrates fetching</p>
+                <h1 id="tabelLabel" >Edge Devices</h1>
+                <p>This component demonstrates fetching Video Analyzers.</p>
+                {pipelineTopologies}
+                <hr />
+                <br />
+                {livePipelines}
+                <hr />
                 <br />
             </div>
         );

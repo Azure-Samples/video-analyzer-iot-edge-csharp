@@ -10,7 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Core" Version="1.16.0" />
     <PackageReference Include="Azure.Media.VideoAnalyzer.Edge" Version="1.0.0-privatepreview.1" />
+    <PackageReference Include="Azure.Messaging.EventHubs" Version="5.5.0-beta.1" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.14" />
     <PackageReference Include="Microsoft.Azure.Devices" Version="1.35.0-preview-001" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime.Azure.Authentication" Version="2.4.1" />

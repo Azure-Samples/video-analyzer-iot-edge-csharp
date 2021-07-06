@@ -1,5 +1,7 @@
 ﻿import React, { Component } from 'react';
 
+const RtspDeviceIdParameter = "rtspDeviceIdParameter";
+
 export class Cloud extends Component {
     static displayName = Cloud.name;
 
@@ -18,11 +20,13 @@ export class Cloud extends Component {
             rtspUrl: "",
             rtspUsername: "",
             rtspPassword: "",
+            deviceId: "",
             livePipelineTopologyName: "",
             livePipelineState: "inactive",
             livePipelineEnabled: false,
             pipelineTopologiesEnabled: false,
-            appSettings: null
+            appSettings: null,
+            showDeviceId: false
         };
         this.token = null;
         this.deletePipelineTopology = this.deletePipelineTopologyOperation.bind(this);
@@ -204,12 +208,20 @@ export class Cloud extends Component {
         };
 
         if (behindProxy) {
+            let parameters = body.Properties.parameters;
+            const deviceIdParam = {
+                "name": RtspDeviceIdParameter,
+                "type": "String",
+                "description": "device id parameter"
+            }
+            parameters.push(deviceIdParam);
+
             let source = body.Properties.sources.pop();
             let endpoint = source.endpoint;
             source.endpoint = {
                 ...endpoint, "tunnel": {
                     "@type": "#Microsoft.VideoAnalyzer.IotSecureDeviceRemoteTunnel",
-                    "deviceId": ioTHubDeviceId,
+                    "deviceId": "${" + RtspDeviceIdParameter + "}",
                     "iotHubArmId": ioTHubArmId,
                     "userAssignedManagedIdentityArmId": ioTHubUserAssignedManagedIdentityArmId
                 }
@@ -249,7 +261,7 @@ export class Cloud extends Component {
 
     async createLivePipelineOperation(event) {
         event.preventDefault();
-        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName } = this.state;
+        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, deviceId, showDeviceId } = this.state;
         const { baseUrl, accountName, apiVersion } = this.state.appSettings;
 
         let body = {
@@ -277,6 +289,15 @@ export class Cloud extends Component {
                     }
                 ]
             }
+        }
+
+        if (showDeviceId && deviceId.length > 0) {
+            const deviceParam = {
+                "name": RtspDeviceIdParameter,
+                "value": deviceId
+            };
+
+            body.properties.parameters.push(deviceParam);
         }
         
         const token = this.token;
@@ -384,8 +405,8 @@ export class Cloud extends Component {
 
             if (action === "deactivate") {
                 this.deleteVideoPlayer(livePipeline);
-                const videoName = properties.parameters.find(x => x.name === "videoNameParameter").value;
-                this.deleteVideoOperation(videoName);
+                //const videoName = properties.parameters.find(x => x.name === "videoNameParameter").value;
+                //this.deleteVideoOperation(videoName);
             }
         }
         catch (e) {
@@ -540,22 +561,39 @@ export class Cloud extends Component {
     }
 
     setFormData(event) {
+        const { pipelineTopologies, showDeviceId } = this.state;
         const elementType = event.target.parentElement.parentElement.name;
         const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
+        let isBehindProxy = showDeviceId;
+
+        if (event.target.type === "select-one" && value !== "") {
+            const selectedPipelineTopology = pipelineTopologies.find(x => x.name === value);
+
+            if (selectedPipelineTopology != null) {
+                const result = selectedPipelineTopology.properties.parameters.find(x => x.name === RtspDeviceIdParameter);
+                isBehindProxy = result != undefined;
+            }
+        }
+
         this.setState({
             ...this.state,
-            [event.target.name]: value
+            [event.target.name]: value,
+            showDeviceId: isBehindProxy
         }, () => this.validate(elementType));
     }
 
     validate(elementType) {
-        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, pipelineTopologyName } = this.state;
+        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, pipelineTopologyName, showDeviceId, deviceId } = this.state;
 
         let isLivePipelineValid = false;
         let isPipelineTopologiesValid = false;
 
         if (elementType === "livepipeline") {
             isLivePipelineValid = livePipelineName.length > 0 && rtspUrl.length > 0 && rtspUsername.length > 0 && rtspPassword.length > 0 && livePipelineTopologyName.length > 0 && videoName.length > 0;
+
+            if (showDeviceId) {
+                isLivePipelineValid = isLivePipelineValid && deviceId.length > 0;
+            }
         }
         else {
             isPipelineTopologiesValid = pipelineTopologyName !== undefined && pipelineTopologyName.length > 0;
@@ -706,10 +744,6 @@ export class Cloud extends Component {
                 </table>
                 <h5>Add new</h5>
                 <form name="livepipeline" onSubmit={(e) => this.createLivePipeline(e)}>
-                    <fieldset>
-                        <label>Name:</label>&nbsp;
-                        <input name="livePipelineName" value={this.state.livePipelineName} onChange={(e) => this.setFormData(e)} />
-                    </fieldset>
                     <fieldset >
                         <label>Topology Name:</label>&nbsp;
                          <select name="livePipelineTopologyName" value={this.state.livePipelineTopologyName} onChange={(e) => this.setFormData(e)}>
@@ -720,6 +754,10 @@ export class Cloud extends Component {
                                 )
                             }
                         </select>
+                    </fieldset>
+                    <fieldset>
+                        <label>Name:</label>&nbsp;
+                        <input name="livePipelineName" value={this.state.livePipelineName} onChange={(e) => this.setFormData(e)} />
                     </fieldset>
                     <fieldset >
                         <label>rtsp Url:</label>&nbsp;
@@ -737,6 +775,15 @@ export class Cloud extends Component {
                         <label>Video Name:</label>&nbsp;
                         <input name="videoName" value={this.state.videoName} onChange={(e) => this.setFormData(e)} placeholder="SampleVideo" />
                     </fieldset>
+                    {
+                        this.state.showDeviceId ?
+                        <fieldset>
+                            <label>Device Id:</label>&nbsp;
+                        <input name="deviceId" value={this.state.deviceId} onChange={(e) => this.setFormData(e)} placeholder="Camera01" />
+                            </fieldset>
+                            :
+                            null
+                    }
                     <button type="submit" disabled={!this.state.livePipelineEnabled}>Create</button>
                 </form>
             </div>

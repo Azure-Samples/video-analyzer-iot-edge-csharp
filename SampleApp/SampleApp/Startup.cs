@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SampleApp.Helpers;
+using SampleApp.Hubs;
 using SampleApp.Models;
 
 namespace SampleApp
@@ -28,7 +29,7 @@ namespace SampleApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddSignalR();
             services.AddControllersWithViews();
 
             // In production, the React files will be served from this directory
@@ -67,6 +68,8 @@ namespace SampleApp
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
+
+                endpoints.MapHub<EventHub>("/eventhub");
             });
 
             app.UseSpa(spa =>
