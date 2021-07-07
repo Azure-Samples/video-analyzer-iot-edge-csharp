@@ -1,4 +1,5 @@
 ﻿import React, { Component } from 'react';
+import CloudApi from '../helpers/CloudApi';
 
 const RtspDeviceIdParameter = "rtspDeviceIdParameter";
 
@@ -7,6 +8,9 @@ export class Cloud extends Component {
 
     constructor(props) {
         super(props);
+        this.api = new CloudApi();
+        this.api.init();
+
         this.state = {
             videoAnalyzers: [],
             pipelineTopologies: [],
@@ -45,21 +49,11 @@ export class Cloud extends Component {
     }
 
     async getToken() {
-        const response = await fetch('Auth/GetToken', {
-            method: 'GET'
-        });
-
-        this.token = await response.text();
+        this.token = await this.api.getToken();
     }
 
     async getConfig() {
-        const response = await fetch('Auth/GetConfig', {
-            method: 'GET'
-        });
-
-        const jsonResponse = await response.json();
-
-        const settings = { ...jsonResponse, "baseUrl": `https://${jsonResponse.armEndpoint}/subscriptions/${jsonResponse.subscription}/resourceGroups/${jsonResponse.resourceGroup}/providers/Microsoft.Media/videoAnalyzers` };
+        const settings = await this.api.getConfig();
         this.setState({ appSettings: settings });
     }
 
@@ -361,85 +355,26 @@ export class Cloud extends Component {
     }
 
     async changeStateLivePipelineOperation(livePipeline, properties) {
-        const { baseUrl, accountName, apiVersion } = this.state.appSettings;
-        const token = this.token;
-        const action = properties.state === "inactive" ? "activate" : "deactivate";
-        
-        const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}/${action}${apiVersion}`;
         try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
+            await this.api.changeStateLivePipeline(livePipeline, properties);
+            await this.getLivePipelines();
 
-            if (response.ok) {
-                let asyncOpUrl = response.headers.get("azure-asyncoperation");
-                const asyncResponse = await fetch(asyncOpUrl, {
-                    method: 'GET',
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (asyncResponse.ok) {
-                    let result = await this.checkStatus(asyncOpUrl);
-
-                    if (result) {
-                        await this.getLivePipelines();
-                    }
-                    else {
-                        alert("Operation failed, please check the console log.");
-                    }
-                }
-                else {
-                    alert("Operation failed, please check the console log.");
-                    console.log(await response.text());
-                }
-            }
-            else {
-                alert("Operation failed, please check the console log.");
-                console.log(await response.text());
-            }
-
-            if (action === "deactivate") {
+            if (properties.state !== "inactive") {
                 this.deleteVideoPlayer(livePipeline);
-                //const videoName = properties.parameters.find(x => x.name === "videoNameParameter").value;
-                //this.deleteVideoOperation(videoName);
             }
         }
         catch (e) {
-            console.log(e);
+            alert(e);
         }
     }
 
     async getPipelinesTopologies() {
-        const { baseUrl, accountName, apiVersion } = this.state.appSettings;
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/pipelineTopologies${apiVersion}`;
         try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            var data = [];
-
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                data = jsonResponse.value;
-            }
-            else {
-                console.log(response.statusText);
-            }
-
+            let data = await this.api.getPipelinesTopologies();
             this.setState({ pipelineTopologies: data });
         }
         catch (e) {
-            console.log(e);
+            alert(e);
         }
         finally {
             this.setState({ loadingPipelineTopologies: false });
@@ -447,31 +382,12 @@ export class Cloud extends Component {
     }
 
     async getLivePipelines() {
-        const { baseUrl, accountName, apiVersion } = this.state.appSettings;
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/livePipelines${apiVersion}`;
         try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            var data = [];
-
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                data = jsonResponse.value;
-            }
-            else {
-                console.log(response.statusText);
-            }
-
+            let data = await this.api.getLivePipelines();
             this.setState({ livePipelines: data });
         }
         catch (e) {
-            console.log(e);
+            alert(e);
         }
         finally {
             this.setState({ loadingLivePipelines: false });
@@ -529,31 +445,12 @@ export class Cloud extends Component {
     }
 
     async listVideoAnalyzers() {
-        const { baseUrl, apiVersion } = this.state.appSettings;
-        const token = this.token;
-        const url = `${baseUrl}${apiVersion}`;
         try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            var data = [];
-
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                data = jsonResponse.value;
-            }
-            else {
-                console.log(response.statusText);
-            }
-
+            let data = await this.api.getVideoAnalyzers();
             this.setState({ videoAnalyzers: data });
         }
         catch (e) {
-            console.log(e);
+            alert(e);
         }
         finally {
             this.setState({ loading: false });
