@@ -75,273 +75,85 @@
         }
     }
 
-    //async deleteLivePipelineOperation(livePipeline) {
-    //    const { baseUrl, apiVersion, accountName } = this.appSettings;
-    //    const token = this.token;
-    //    const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}${apiVersion}`;
+    async deleteLivePipeline(livePipeline) {
+        try {
+            const { baseUrl, apiVersion, accountName } = this.appSettings;
+            const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}${apiVersion}`;
+            const response = await this.callApi(url, 'DELETE');
 
-    //    return this.callApi('Opportunity', 'DELETE');
-    //    try {
-    //        const response = await fetch(url, {
-    //            method: 'DELETE',
-    //            headers: {
-    //                "Authorization": `Bearer ${token}`
-    //            }
-    //        });
+            if (!response.ok) {
+                const errorMessageObj = await response.json();
+                throw new Error(errorMessageObj.error.message);
+            }
+        }
+        catch (e) {
+            throw e;
+        }
+    }
 
-    //        if (response.ok) {
-    //            await this.getLivePipelines();
-    //        }
-    //        else {
-    //            const errorMessageObj = await response.json();
-    //            alert(`Cannot delete livepipeline: ${errorMessageObj.error.message}`);
-    //        }
-    //    }
-    //    catch (e) {
-    //        console.log(e);
-    //    }
-    //}
+    async deleteVideo(videoName) {
+        try {
+            const { baseUrl, apiVersion, accountName } = this.appSettings;
+            const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
+            const response = await this.callApi(url, 'DELETE');
 
-    //async deleteVideoOperation(videoName) {
-    //    const { baseUrl, apiVersion, accountName } = this.state.appSettings;
-    //    const token = this.token;
-    //    const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
-    //    try {
-    //        const response = await fetch(url, {
-    //            method: 'DELETE',
-    //            headers: {
-    //                "Authorization": `Bearer ${token}`
-    //            }
-    //        });
+            if (!response.ok) {
+                const errorMessageObj = await response.json();
+                throw new Error(errorMessageObj.error.message);
+            }
+        }
+        catch (e) {
+            throw e;
+        }
+    }
 
-    //        if (!response.ok) {
-    //            const errorMessageObj = await response.json();
-    //            console.log(`Cannot delete video ${videoName}: ${errorMessageObj.error.message}`);
-    //        }
-    //    }
-    //    catch (e) {
-    //        console.log(e);
-    //    }
-    //}
+    async deletePipelineTopology(pipelineTopologyName) {
+        try {
+            const { baseUrl, apiVersion, accountName } = this.appSettings;
+            const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
+            const response = await this.callApi(url, 'DELETE');
 
-    //async deletePipelineTopologyOperation(pipelineTopologyName) {
-    //    const { baseUrl, apiVersion, accountName } = this.state.appSettings;
-    //    const token = this.token;
-    //    const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
-    //    try {
-    //        const response = await fetch(url, {
-    //            method: 'DELETE',
-    //            headers: {
-    //                "Authorization": `Bearer ${token}`
-    //            }
-    //        });
+            if (!response.ok) {
+                const errorMessageObj = await response.json();
+                throw new Error(errorMessageObj.error.message);
+            }
+        }
+        catch (e) {
+            throw e;
+        }
+    }
 
-    //        if (response.ok) {
-    //            await this.getPipelinesTopologies();
-    //        }
-    //        else {
-    //            const errorMessageObj = await response.json();
-    //            alert(`Cannot delete pipelineTopology: ${errorMessageObj.error.message}`);
-    //        }
-    //    }
-    //    catch (e) {
-    //        console.log(e);
-    //    }
-    //}
+    async createPipelineTopology(pipelineTopology) {
+        try {
+            const { baseUrl, accountName, apiVersion } = this.appSettings;
+            const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopology.Name}${apiVersion}`;
+            const response = await this.callApi(url, 'PUT', { body: JSON.stringify(pipelineTopology) });
 
-    //async createPipelineTopologyOperation(event) {
-    //    event.preventDefault();
-    //    const { pipelineTopologyName, behindProxy } = this.state;
-    //    const { baseUrl, apiVersion, accountName, ioTHubDeviceId, ioTHubArmId, ioTHubUserAssignedManagedIdentityArmId } = this.state.appSettings;
+            if (!response.ok) {
+                const errorMessageObj = await response.json();
+                throw new Error(errorMessageObj.error.message);
+            }
+        }
+        catch (e) {
+            throw e;
+        }
+    }
 
-    //    let body = {
-    //        "Name": pipelineTopologyName,
-    //        "Kind": "liveUltraLowLatency",
-    //        "Sku": {
-    //            "Name": "S1",
-    //            "Tier": "Standard"
-    //        },
-    //        "Properties": {
-    //            "description": "pipeline topology test description",
-    //            "parameters": [
-    //                {
-    //                    "name": "rtspUrlParameter",
-    //                    "type": "String",
-    //                    "description": "rtsp source url parameter"
-    //                },
-    //                {
-    //                    "name": "rtspUsernameParameter",
-    //                    "type": "String",
-    //                    "description": "rtsp source username parameter"
-    //                },
-    //                {
-    //                    "name": "rtspPasswordParameter",
-    //                    "type": "SecretString",
-    //                    "description": "rtsp source password parameter"
-    //                },
-    //                {
-    //                    "name": "videoNameParameter",
-    //                    "type": "String",
-    //                    "description": "video name parameter"
-    //                }
-    //            ],
-    //            "sources": [
-    //                {
-    //                    "@type": "#Microsoft.VideoAnalyzer.RtspSource",
-    //                    "name": "rtspSource",
-    //                    "transport": "tcp",
-    //                    "endpoint": {
-    //                        "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
-    //                        "url": "${rtspUrlParameter}",
-    //                        "credentials": {
-    //                            "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
-    //                            "username": "${rtspUsernameParameter}",
-    //                            "password": "${rtspPasswordParameter}"
-    //                        }
-    //                    }
-    //                }
-    //            ],
-    //            "sinks": [
-    //                {
-    //                    "@type": "#Microsoft.VideoAnalyzer.VideoSink",
-    //                    "name": "videoSink",
-    //                    "videoName": "${videoNameParameter}",
-    //                    "videoCreationProperties": {
-    //                        "title": "Sample Video",
-    //                        "description": "Sample Video",
-    //                        "segmentLength": "PT30S"
-    //                    },
-    //                    "inputs": [
-    //                        {
-    //                            "nodeName": "rtspSource"
-    //                        }
-    //                    ]
-    //                }
-    //            ]
-    //        }
-    //    };
+    async createLivePipeline(livePipeline) {
+        try {
+            const { baseUrl, accountName, apiVersion } = this.appSettings;
+            const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline.name}${apiVersion}`;
+            const response = await this.callApi(url, 'PUT', { body: JSON.stringify(livePipeline) });
 
-    //    if (behindProxy) {
-    //        let parameters = body.Properties.parameters;
-    //        const deviceIdParam = {
-    //            "name": RtspDeviceIdParameter,
-    //            "type": "String",
-    //            "description": "device id parameter"
-    //        }
-    //        parameters.push(deviceIdParam);
-
-    //        let source = body.Properties.sources.pop();
-    //        let endpoint = source.endpoint;
-    //        source.endpoint = {
-    //            ...endpoint, "tunnel": {
-    //                "@type": "#Microsoft.VideoAnalyzer.IotSecureDeviceRemoteTunnel",
-    //                "deviceId": "${" + RtspDeviceIdParameter + "}",
-    //                "iotHubArmId": ioTHubArmId,
-    //                "userAssignedManagedIdentityArmId": ioTHubUserAssignedManagedIdentityArmId
-    //            }
-    //        };
-
-    //        body.Properties.sources.push(source);
-    //    }
-
-    //    const token = this.token;
-    //    const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
-    //    try {
-    //        const response = await fetch(url, {
-    //            method: 'PUT',
-    //            headers: {
-    //                "Authorization": `Bearer ${token}`,
-    //                "Content-Type": "application/json"
-    //            },
-    //            body: JSON.stringify(body)
-    //        });
-
-    //        if (response.ok) {
-    //            this.setState({ pipelineTopologyName: "", videoName: "", behindProxy: false }, async () =>
-    //                await this.getPipelinesTopologies());
-    //        }
-    //        else {
-    //            const errorMessageObj = await response.json();
-    //            alert(`Cannot create tje pipelineTopology: ${errorMessageObj.error.message}`);
-    //        }
-    //    }
-    //    catch (e) {
-    //        console.log(e);
-    //    }
-    //    finally {
-    //        this.setState({ loadingPipelineTopologies: false });
-    //    }
-    //}
-
-    //async createLivePipelineOperation(event) {
-    //    event.preventDefault();
-    //    const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, deviceId, showDeviceId } = this.state;
-    //    const { baseUrl, accountName, apiVersion } = this.state.appSettings;
-
-    //    let body = {
-    //        "name": livePipelineName,
-    //        "properties": {
-    //            "topologyName": livePipelineTopologyName,
-    //            "description": "live pipeline test description",
-    //            "bitrateKbps": 500,
-    //            "parameters": [
-    //                {
-    //                    "name": "rtspUrlParameter",
-    //                    "value": rtspUrl
-    //                },
-    //                {
-    //                    "name": "rtspUsernameParameter",
-    //                    "value": rtspUsername
-    //                },
-    //                {
-    //                    "name": "rtspPasswordParameter",
-    //                    "value": rtspPassword
-    //                },
-    //                {
-    //                    "name": "videoNameParameter",
-    //                    "value": videoName
-    //                }
-    //            ]
-    //        }
-    //    }
-
-    //    if (showDeviceId && deviceId.length > 0) {
-    //        const deviceParam = {
-    //            "name": RtspDeviceIdParameter,
-    //            "value": deviceId
-    //        };
-
-    //        body.properties.parameters.push(deviceParam);
-    //    }
-
-    //    const token = this.token;
-    //    const url = `${baseUrl}/${accountName}/livePipelines/${livePipelineName}${apiVersion}`;
-    //    try {
-    //        const response = await fetch(url, {
-    //            method: 'PUT',
-    //            headers: {
-    //                "Authorization": `Bearer ${token}`,
-    //                "Content-Type": "application/json"
-    //            },
-    //            body: JSON.stringify(body)
-    //        });
-
-    //        if (response.ok) {
-    //            this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "", videoName: "" },
-    //                async () => await this.getLivePipelines());
-    //        }
-    //        else {
-    //            const errorMessageObj = await response.json();
-    //            alert(`Cannot create livepipeline: ${errorMessageObj.error.message}`);
-    //        }
-    //    }
-    //    catch (e) {
-    //        console.log(e);
-    //    }
-    //    finally {
-    //        this.setState({ loadingLivePipelines: false });
-    //    }
-    //}
+            if (!response.ok) {
+                const errorMessageObj = await response.json();
+                throw new Error(errorMessageObj.error.message);
+            }
+        }
+        catch (e) {
+            throw e;
+        }
+    }
 
     async checkStatus(asyncOpUrl) {
         try {
@@ -359,11 +171,12 @@
                 }
             }
             else {
-                throw new Error(await asyncResponse.text());
+                const errorMessageObj = await asyncResponse.json();
+                throw new Error(errorMessageObj.error.message);
             }
         }
         catch (e) {
-            throw new Error(e);
+            throw e;
         }
     }
 
@@ -440,54 +253,42 @@
         }
     }
 
-    //async getVideoPlayback(videoName, pipelineName) {
-    //    const { baseUrl, accountName, apiVersion } = this.state.appSettings;
-    //    const token = this.token;
-    //    const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
-    //    const authUrl = `${baseUrl}/${accountName}/videos/${videoName}/listStreamingToken${apiVersion}`;
-    //    try {
-    //        const response = await fetch(url, {
-    //            method: 'GET',
-    //            headers: {
-    //                "Authorization": `Bearer ${token}`
-    //            }
-    //        });
+    async getVideoPlayback(videoName) {
+        try {
+            const { baseUrl, accountName, apiVersion } = this.appSettings;
+            const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
+            const authUrl = `${baseUrl}/${accountName}/videos/${videoName}/listStreamingToken${apiVersion}`;
 
-    //        let tunneledRtspUrl = "";
-    //        let playbackToken = "";
-    //        if (response.ok) {
-    //            const jsonResponse = await response.json();
-    //            tunneledRtspUrl = jsonResponse.properties.streaming.rtspTunnelUrl;
+            const response = await this.callApi(url, 'GET');
+            let tunneledRtspUrl = "";
+            let playbackToken = "";
+            if (response.ok) {
+                const jsonResponse = await response.json();
+                tunneledRtspUrl = jsonResponse.properties.streaming.rtspTunnelUrl;
 
-    //            const responseAuth = await fetch(authUrl, {
-    //                method: 'POST',
-    //                headers: {
-    //                    "Authorization": `Bearer ${token}`
-    //                }
-    //            });
+                const responseAuth = await this.callApi(authUrl, 'POST');
 
-    //            if (responseAuth.ok) {
-    //                const jsonAuthResponse = await responseAuth.json();
-    //                playbackToken = jsonAuthResponse.token;
-    //            }
-    //            else {
-    //                const errorMessageObj = await responseAuth.json();
-    //                alert(`Cannot get video playback token: ${errorMessageObj.error.message}`);
-    //            }
-    //        }
-    //        else {
-    //            const errorMessageObj = await response.json();
-    //            alert(`Cannot get video playback url: ${errorMessageObj.error.message}`);
-    //        }
+                if (responseAuth.ok) {
+                    const jsonAuthResponse = await responseAuth.json();
+                    playbackToken = jsonAuthResponse.token;
 
-    //        this.renderVideoPlayer(tunneledRtspUrl, playbackToken, pipelineName);
-    //    }
-    //    catch (e) {
-    //        console.log(e);
-    //    }
-    //    finally {
-    //        this.setState({ loadingLivePipelines: false });
-    //    }
-    //}
+                    return {
+                        playbackToken: playbackToken,
+                        tunneledRtspUrl: tunneledRtspUrl
+                    };
+                }
+                else {
+                    const errorMessageObj = await responseAuth.json();
+                    throw new Error(`Cannot get video playback token: ${errorMessageObj.error.message}`);
+                }
+            }
+            else {
+                const errorMessageObj = await response.json();
+                throw new Error(`Cannot get video playback url: ${errorMessageObj.error.message}`);
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 

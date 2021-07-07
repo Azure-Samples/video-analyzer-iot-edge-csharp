@@ -58,81 +58,38 @@ export class Cloud extends Component {
     }
 
     async deleteLivePipelineOperation(livePipeline) {
-        const { baseUrl, apiVersion, accountName } = this.state.appSettings;
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/livePipelines/${livePipeline}${apiVersion}`;
         try {
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                await this.getLivePipelines();
-            }
-            else {
-                const errorMessageObj = await response.json();
-                alert(`Cannot delete livepipeline: ${errorMessageObj.error.message}`);
-            }
+            await this.api.deleteLivePipeline(livePipeline);
+            await this.getLivePipelines();
         }
         catch (e) {
-            console.log(e);
+            alert(`Cannot delete livepipeline: ${e}`);
         }
     }
 
     async deleteVideoOperation(videoName) {
-        const { baseUrl, apiVersion, accountName } = this.state.appSettings;
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
         try {
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorMessageObj = await response.json();
-                console.log(`Cannot delete video ${videoName}: ${errorMessageObj.error.message}`);
-            }
+            await this.api.deleteVideo(videoName);
         }
         catch (e) {
-            console.log(e);
+            alert(`Cannot delete video ${videoName}: ${e}`);
         }
     }
 
     async deletePipelineTopologyOperation(pipelineTopologyName) {
-        const { baseUrl, apiVersion, accountName } = this.state.appSettings;
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
         try {
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                await this.getPipelinesTopologies();
-            }
-            else {
-                const errorMessageObj = await response.json();
-                alert(`Cannot delete pipelineTopology: ${errorMessageObj.error.message}`);
-            }
+            await this.api.deletePipelineTopology(pipelineTopologyName);
+            await this.getPipelinesTopologies();
         }
         catch (e) {
-            console.log(e);
+            alert(`Cannot delete pipelineTopology: ${e}`);
         }
     }
 
     async createPipelineTopologyOperation(event) {
         event.preventDefault();
         const { pipelineTopologyName, behindProxy } = this.state;
-        const { baseUrl, apiVersion, accountName, ioTHubDeviceId, ioTHubArmId, ioTHubUserAssignedManagedIdentityArmId } = this.state.appSettings;
+        const { ioTHubArmId, ioTHubUserAssignedManagedIdentityArmId } = this.state.appSettings;
 
         let body = {
             "Name": pipelineTopologyName,
@@ -224,29 +181,13 @@ export class Cloud extends Component {
             body.Properties.sources.push(source);
         }
        
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/pipelineTopologies/${pipelineTopologyName}${apiVersion}`;
         try {
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
-            });
-
-            if (response.ok) {
-                this.setState({ pipelineTopologyName: "", videoName: "", behindProxy: false }, async () =>
-                    await this.getPipelinesTopologies());
-            }
-            else {
-                const errorMessageObj = await response.json();
-                alert(`Cannot create tje pipelineTopology: ${errorMessageObj.error.message}`);
-            }
+            await this.api.createPipelineTopology(body);
+            this.setState({ pipelineTopologyName: "", videoName: "", behindProxy: false }, async () =>
+                await this.getPipelinesTopologies());
         }
         catch (e) {
-            console.log(e);
+            alert(`Cannot create the pipelineTopology: ${e}`);
         }
         finally {
             this.setState({ loadingPipelineTopologies: false });
@@ -256,7 +197,6 @@ export class Cloud extends Component {
     async createLivePipelineOperation(event) {
         event.preventDefault();
         const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, deviceId, showDeviceId } = this.state;
-        const { baseUrl, accountName, apiVersion } = this.state.appSettings;
 
         let body = {
             "name": livePipelineName,
@@ -293,64 +233,17 @@ export class Cloud extends Component {
 
             body.properties.parameters.push(deviceParam);
         }
-        
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/livePipelines/${livePipelineName}${apiVersion}`;
-        try {
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
-            });
 
-            if (response.ok) {
-                this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "", videoName: "" },
-                    async() => await this.getLivePipelines());           
-            }
-            else {
-                const errorMessageObj = await response.json();
-                alert(`Cannot create livepipeline: ${errorMessageObj.error.message}`);
-            }
+        try {
+            await this.api.createLivePipeline(body);
+            this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "", videoName: "" },
+                async () => await this.getLivePipelines());
         }
         catch (e) {
-            console.log(e);
+            alert(`Cannot create livepipeline: ${e}`);
         }
         finally {
             this.setState({ loadingLivePipelines: false });
-        }
-    }
-
-    async checkStatus(asyncOpUrl) {
-        const token = this.token;
-        
-        try {
-            const asyncResponse = await fetch(asyncOpUrl, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            if (asyncResponse.ok) {
-                const jsonResp = JSON.parse(await asyncResponse.text());
-                if (jsonResp.status === "Running") {
-                    return await this.checkStatus(asyncOpUrl);
-                } else if (jsonResp.status === "Succeeded") {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-            else {
-                throw new Error(await asyncResponse.text());
-            }
-        }
-        catch (e) {
-            throw new Error(e);
         }
     }
 
@@ -395,52 +288,13 @@ export class Cloud extends Component {
     }
 
     async getVideoPlayback(videoName, pipelineName) {
-        const { baseUrl, accountName, apiVersion } = this.state.appSettings;
-        const token = this.token;
-        const url = `${baseUrl}/${accountName}/videos/${videoName}${apiVersion}`;
-        const authUrl = `${baseUrl}/${accountName}/videos/${videoName}/listStreamingToken${apiVersion}`;
+        
         try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            let tunneledRtspUrl = "";
-            let playbackToken = "";
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                tunneledRtspUrl = jsonResponse.properties.streaming.rtspTunnelUrl;
-
-                const responseAuth = await fetch(authUrl, {
-                    method: 'POST',
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (responseAuth.ok) {
-                    const jsonAuthResponse = await responseAuth.json();
-                    playbackToken = jsonAuthResponse.token;
-                }
-                else {
-                    const errorMessageObj = await responseAuth.json();
-                    alert(`Cannot get video playback token: ${errorMessageObj.error.message}`);
-                }
-            }
-            else {
-                const errorMessageObj = await response.json();
-                alert(`Cannot get video playback url: ${errorMessageObj.error.message}`);
-            }
-
-            this.renderVideoPlayer(tunneledRtspUrl, playbackToken, pipelineName);
+            let response = await this.api.getVideoPlayback(videoName);
+            this.renderVideoPlayer(response.tunneledRtspUrl, response.playbackToken, pipelineName);
         }
         catch (e) {
-            console.log(e);
-        }
-        finally {
-            this.setState({ loadingLivePipelines: false });
+            alert(e);
         }
     }
 
