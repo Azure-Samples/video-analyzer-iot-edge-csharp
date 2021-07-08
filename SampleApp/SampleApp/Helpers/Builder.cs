@@ -57,10 +57,44 @@ namespace SampleApp.Helpers
                 });
 
             properties.Parameters.Add(
-               new ParameterDeclaration("motionSensitivity", ParameterType.String)
+               new ParameterDeclaration("inferencingUrl", ParameterType.String)
                {
-                   Description = "motion detection sensitivity.",
-                   Default = "medium"
+                   Description = "inferencing url.",
+                   Default = "http://yolov3/score"
+               });
+
+            properties.Parameters.Add(
+               new ParameterDeclaration("inferencingUserName", ParameterType.String)
+               {
+                   Description = "inferencing UserName",
+                   Default = "dummyusername"
+               });
+
+            properties.Parameters.Add(
+               new ParameterDeclaration("inferencingPassword", ParameterType.String)
+               {
+                   Description = "inferencing Password",
+                   Default = "dummypassword"
+               });
+
+            properties.Parameters.Add(
+               new ParameterDeclaration("frameWidth", ParameterType.String)
+               {
+                   Description = "Width of the video frame to be received from AVA.",
+                   Default = "416"
+               });
+
+            properties.Parameters.Add(
+               new ParameterDeclaration("frameHeight", ParameterType.String)
+               {
+                   Description = "Height of the video frame to be received from AVA.",
+                   Default = "416"
+               });
+
+            properties.Parameters.Add(
+               new ParameterDeclaration("videoName", ParameterType.String)
+               {
+                   Description = "The name of the video"
                });
         }
 
@@ -80,11 +114,26 @@ namespace SampleApp.Helpers
         private static void SetProcessors(PipelineTopologyProperties properties)
         {
             properties.Processors.Add(
-                new MotionDetectionProcessor("motionDetection", new List<NodeInput> { { new NodeInput("rtspSource") } })
+                new SignalGateProcessor("signalGateProcessor", new List<NodeInput> { { new NodeInput("rtspSource") } })
                 {
-                    Sensitivity = "${motionSensitivity}"
+                    ActivationEvaluationWindow = "PT1S",
+                    ActivationSignalOffset = "-PT5S",
+                    MinimumActivationTime = "PT30S",
+                    MaximumActivationTime = "PT30S"
                 }
             );
+
+            properties.Processors.Add(new HttpExtension("inferenceClient", new List<NodeInput> { { new NodeInput("rtspSource") } },
+               new UnsecuredEndpoint("${inferencingUrl}")
+               {
+                   Credentials = new UsernamePasswordCredentials("${inferencingUserName}", "${inferencingPassword}")
+               },
+               new ImageProperties()
+               {
+                   Format = new ImageFormatBmp(),
+                   Scale = new ImageScale() { Height = "${frameHeight}", Width = "${frameWidth}", Mode = ImageScaleMode.PreserveAspectRatio }
+               }
+           ));
         }
 
         // Add sinks to Topology
@@ -94,10 +143,28 @@ namespace SampleApp.Helpers
                 new IotHubMessageSink(
                     "hubSink",
                     new List<NodeInput> {
-                        { new NodeInput("motionDetection") }
+                        { new NodeInput("inferenceClient") }
                     },
                     "inferenceOutput")
                 );
+
+            properties.Sinks.Add(
+               new VideoSink("videoSink",
+                   new List<NodeInput> {
+                        { new NodeInput("signalGateProcessor") }
+                   },
+                   "${videoName}",
+                   "/var/lib/azuremediaservices/tmp/",
+                   "2048")
+               {
+                   VideoCreationProperties = new VideoCreationProperties()
+                   {
+                       Description = "EvrHubVideo sample video",
+                       SegmentLength = "PT30S",
+                       Title = "EvrHubVideo"
+                   }
+               }
+           );
         }
 
         public static LivePipeline BuildLivePipepine(
@@ -105,7 +172,8 @@ namespace SampleApp.Helpers
             string pipelineTopologyName,
             string url,
             string userName,
-            string password)
+            string password,
+            string videoName)
         {
             var result = new LivePipeline(livePipelineName)
             {
@@ -119,7 +187,8 @@ namespace SampleApp.Helpers
             result.Properties.Parameters.Add(new ParameterDefinition("rtspUrl") { Value = url });
             result.Properties.Parameters.Add(new ParameterDefinition("rtspUserName") { Value = userName });
             result.Properties.Parameters.Add(new ParameterDefinition("rtspPassword") { Value = password });
-           
+            result.Properties.Parameters.Add(new ParameterDefinition("videoName") { Value = videoName});
+
             return result;
         }
     }

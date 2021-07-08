@@ -96,7 +96,15 @@ namespace SampleApp.Controllers
                 var pipelineTopology = Builder.BuildPipelineTopology(pipelineTopologyName);
                 var method = new PipelineTopologySetRequest(pipelineTopology);
                 var result = await InvokeDirectMethodHelper(method);
-                return Ok(result);
+
+                if (result.Status >= 200 && result.Status < 400)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result.GetPayloadAsJson());
+                }
             }
             catch (Exception ex)
             {
@@ -113,7 +121,15 @@ namespace SampleApp.Controllers
             {
                 var method = new PipelineTopologyDeleteRequest(pipelineTopologyName);
                 var result = await InvokeDirectMethodHelper(method);
-                return Ok(result);
+
+                if (result.Status >= 200 && result.Status < 400)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result.GetPayloadAsJson());
+                }
             }
             catch (Exception ex)
             {
@@ -147,15 +163,24 @@ namespace SampleApp.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> LivePipelineSet([FromQuery] string livePipelineName, [FromQuery] string pipelineTopologyName, [FromQuery] string url, [FromQuery] string userName, [FromQuery] string password)
+        [HttpPut]
+        public async Task<IActionResult> LivePipelineSet([FromBody] LivePipelineRequestPayload requestPayload)
         {
             try
             {
-                var livePipeline = Builder.BuildLivePipepine(livePipelineName, pipelineTopologyName, url, userName, password);
+                var livePipeline = Builder.BuildLivePipepine(requestPayload.LivePipelineName, requestPayload.PipelineTopologyName,
+                    requestPayload.Url, requestPayload.Username, requestPayload.Password, requestPayload.VideoName);
                 var method = new LivePipelineSetRequest(livePipeline);
                 var result = await InvokeDirectMethodHelper(method);
-                return Ok(result);
+
+                if (result.Status >= 200 && result.Status < 400)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result.GetPayloadAsJson());
+                }
             }
             catch (Exception ex)
             {
@@ -224,7 +249,15 @@ namespace SampleApp.Controllers
             {
                 var method = new LivePipelineDeleteRequest(livePipelineName);
                 var result = await InvokeDirectMethodHelper(method);
-                return Ok(result);
+
+                if (result.Status >= 200 && result.Status < 400)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result.GetPayloadAsJson());
+                }
             }
             catch (Exception ex)
             {

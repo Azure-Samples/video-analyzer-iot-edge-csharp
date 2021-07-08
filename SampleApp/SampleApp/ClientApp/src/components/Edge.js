@@ -1,11 +1,15 @@
 ﻿import React, { Component } from 'react';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import CloudApi from '../helpers/CloudApi';
 
 export class Edge extends Component {
     static displayName = Edge.name;
 
     constructor(props) {
         super(props);
+        this.api = new CloudApi();
+        this.api.init();
+
         this.state = {
             pipelineTopologies: [],
             livePipelines: [],
@@ -23,7 +27,8 @@ export class Edge extends Component {
             livePipelineEnabled: false,
             pipelineTopologiesEnabled: false,
             connection: null,
-            events: []
+            events: [],
+            appSettings: {}
         };
         this.token = null;
         this.deletePipelineTopology = this.deletePipelineTopologyOperation.bind(this);
@@ -34,9 +39,15 @@ export class Edge extends Component {
     }
 
     async componentDidMount() {
+        await this.getConfig();
         await this.getPipelinesTopologies();
         await this.getLivePipelines();
         await this.initConnection();
+    }
+
+    async getConfig() {
+        const settings = await this.api.getConfig();
+        this.setState({ appSettings: settings });
     }
 
     async initConnection() {
@@ -58,17 +69,9 @@ export class Edge extends Component {
         this.setState({ connection: connection });
     }
 
-    async getToken() {
-        const response = await fetch('Auth/GetToken', {
-            method: 'GET'
-        });
-
-        this.token = await response.text();
-    }
-
     async deleteLivePipelineOperation(livePipeline) {
         const token = this.token;
-        const url = '';
+        const url = `/VideoAnalyzer/LivePipelineDelete?livePipelineName=${livePipeline}`;
         try {
             const response = await fetch(url, {
                 method: 'DELETE',
@@ -81,8 +84,8 @@ export class Edge extends Component {
                 await this.getLivePipelines();
             }
             else {
-                const errorMessageObj = await response.json();
-                alert(`Cannot delete livepipeline: ${errorMessageObj.error.message}`);
+                const errorMessageObj = JSON.parse(await response.json());
+                alert(`Cannot delete LivePipeline: ${errorMessageObj.error.message}`);
             }
         }
         catch (e) {
@@ -101,7 +104,7 @@ export class Edge extends Component {
                 await this.getPipelinesTopologies();
             }
             else {
-                const errorMessageObj = await response.json();
+                const errorMessageObj = JSON.parse(await response.json());
                 alert(`Cannot delete pipelineTopology: ${errorMessageObj.error.message}`);
             }
         }
@@ -110,9 +113,167 @@ export class Edge extends Component {
         }
     }
 
+    createPipelineTopologyBody(pipelineTopologyName) {
+        const { ioTHubArmId, ioTHubUserAssignedManagedIdentityArmId } = this.state.appSettings;
+        const behindProxy = true;
+        const RtspDeviceIdParameter = "rtspDeviceIdParameter";
+
+        let body = {
+            "Name": pipelineTopologyName,
+            "Kind": "liveUltraLowLatency",
+            "Sku": {
+                "Name": "S1",
+                "Tier": "Standard"
+            },
+            "Properties": {
+                "description": "pipeline topology test description",
+                "parameters": [
+                    {
+                        "name": "rtspUrlParameter",
+                        "type": "String",
+                        "description": "rtsp source url parameter"
+                    },
+                    {
+                        "name": "rtspUsernameParameter",
+                        "type": "String",
+                        "description": "rtsp source username parameter"
+                    },
+                    {
+                        "name": "rtspPasswordParameter",
+                        "type": "SecretString",
+                        "description": "rtsp source password parameter"
+                    },
+                    {
+                        "name": "videoNameParameter",
+                        "type": "String",
+                        "description": "video name parameter"
+                    },
+                    {
+                        "name": "inferencingUrl",
+                        "type": "String",
+                        "description": "inferencing Url",
+                        "default": "http://yolov3/score"
+                    },
+                    {
+                        "name": "inferencingUserName",
+                        "type": "String",
+                        "description": "inferencing endpoint user name.",
+                        "default": "dummyUserName"
+                    },
+                    {
+                        "name": "inferencingPassword",
+                        "type": "String",
+                        "description": "inferencing endpoint password.",
+                        "default": "dummyPassword"
+                    }
+                ],
+                "sources": [
+                    {
+                        "@type": "#Microsoft.VideoAnalyzer.RtspSource",
+                        "name": "rtspSource",
+                        "transport": "tcp",
+                        "endpoint": {
+                            "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
+                            "url": "${rtspUrlParameter}",
+                            "credentials": {
+                                "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+                                "username": "${rtspUsernameParameter}",
+                                "password": "${rtspPasswordParameter}"
+                            }
+                        }
+                    }
+                ],
+                "processors": [
+                    {
+                        "@type": "#Microsoft.VideoAnalyzer.HttpExtension",
+                        "name": "httpExtension",
+                        "endpoint": {
+                            "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
+                            "url": "${inferencingUrl}",
+                            "credentials": {
+                                "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+                                "username": "${inferencingUserName}",
+                                "password": "${inferencingPassword}"
+                            }
+                        },
+                        "image": {
+                            "scale": {
+                                "mode": "pad",
+                                "width": "416",
+                                "height": "416"
+                            },
+                            "format": {
+                                "@type": "#Microsoft.VideoAnalyzer.ImageFormatBmp"
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "nodeName": "rtspSource",
+                                "outputSelectors": [
+                                    {
+                                        "property": "mediaType",
+                                        "operator": "is",
+                                        "value": "video"
+                                    }
+                                ]
+                            }
+                        ],
+                        "samplingOptions": {
+                            "skipSamplesWithoutAnnotation": "false",
+                            "maximumSamplesPerSecond": "5"
+                        }
+                    }
+                ],
+                "sinks": [
+                    {
+                        "@type": "#Microsoft.VideoAnalyzer.VideoSink",
+                        "name": "videoSink",
+                        "videoName": "${videoNameParameter}",
+                        "videoCreationProperties": {
+                            "title": "Sample Video",
+                            "description": "Sample Video",
+                            "segmentLength": "PT30S"
+                        },
+                        "inputs": [
+                            {
+                                "nodeName": "rtspSource"
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        if (behindProxy) {
+            let parameters = body.Properties.parameters;
+            const deviceIdParam = {
+                "name": RtspDeviceIdParameter,
+                "type": "String",
+                "description": "device id parameter"
+            }
+            parameters.push(deviceIdParam);
+
+            let source = body.Properties.sources.pop();
+            let endpoint = source.endpoint;
+            source.endpoint = {
+                ...endpoint, "tunnel": {
+                    "@type": "#Microsoft.VideoAnalyzer.IotSecureDeviceRemoteTunnel",
+                    "deviceId": "${" + RtspDeviceIdParameter + "}",
+                    "iotHubArmId": ioTHubArmId,
+                    "userAssignedManagedIdentityArmId": ioTHubUserAssignedManagedIdentityArmId
+                }
+            };
+
+            body.Properties.sources.push(source);
+        }
+
+        return body;
+    }
+
     async createPipelineTopologyOperation(event) {
         event.preventDefault();
-        const { pipelineTopologyName, behindProxy } = this.state;
+        const { pipelineTopologyName } = this.state;
+        
 
         const url = `/VideoAnalyzer/PipelineTopologySet?pipelineTopologyName=${pipelineTopologyName}`;
         try {
@@ -126,10 +287,14 @@ export class Edge extends Component {
             if (response.ok) {
                 this.setState({ pipelineTopologyName: "", videoName: "", behindProxy: false }, async () =>
                     await this.getPipelinesTopologies());
+
+                // Create Cloud PipelineTopology
+                const body = this.createPipelineTopologyBody(pipelineTopologyName);
+                await this.api.createPipelineTopology(body);
             }
             else {
                 const errorMessageObj = await response.json();
-                alert(`Cannot create tje pipelineTopology: ${errorMessageObj.error.message}`);
+                alert(`Cannot create the pipelineTopology: ${errorMessageObj.error.message}`);
             }
         }
         catch (e) {
@@ -143,11 +308,25 @@ export class Edge extends Component {
     async createLivePipelineOperation(event) {
         event.preventDefault();
         const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName } = this.state;
-        const url = `/VideoAnalyzer/LivePipelineSet?pipelineTopologyName=${livePipelineTopologyName}&livePipelineName=${livePipelineName}&username=${rtspUsername}&password=${rtspPassword}&url=${rtspUrl}`;
+
+        const body = {
+            pipelineTopologyName: livePipelineTopologyName,
+            livePipelineName: livePipelineName,
+            username: rtspUsername,
+            password: rtspPassword,
+            url: rtspUrl,
+            videoName: videoName
+        };
+
+        const url = '/VideoAnalyzer/LivePipelineSet';
         
         try {
             const response = await fetch(url, {
-                method: 'POST'
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
             });
 
             if (response.ok) {
@@ -156,7 +335,7 @@ export class Edge extends Component {
             }
             else {
                 const errorMessageObj = await response.json();
-                alert(`Cannot create livepipeline: ${errorMessageObj.error.message}`);
+                alert(`Cannot create the LivePipeline: ${errorMessageObj.error.message}`);
             }
         }
         catch (e) {
@@ -428,9 +607,9 @@ export class Edge extends Component {
 
                 <h5>Add new</h5>
                 <form name="pipelinetopology" onSubmit={(e) => this.createPipelineTopology(e)}>
-                    <fieldset>
-                        <label>Behind proxy</label>&nbsp;<input type="checkbox" checked={this.state.behindProxy} name="behindProxy" onChange={(e) => this.setFormData(e)} />
-                    </fieldset>
+                    {/*<fieldset>*/}
+                    {/*    <label>Behind proxy</label>&nbsp;<input type="checkbox" checked={this.state.behindProxy} name="behindProxy" onChange={(e) => this.setFormData(e)} />*/}
+                    {/*</fieldset>*/}
                     <fieldset>
                         <label>Name:</label>&nbsp;
                         <input name="pipelineTopologyName" value={this.state.pipelineTopologyName} onChange={(e) => this.setFormData(e)} />
