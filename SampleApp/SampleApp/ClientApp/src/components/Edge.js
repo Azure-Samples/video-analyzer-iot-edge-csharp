@@ -28,8 +28,10 @@ export class Edge extends Component {
             pipelineTopologiesEnabled: false,
             connection: null,
             events: [],
-            appSettings: {}
+            appSettings: {},
+            deviceId: ""
         };
+
         this.token = null;
         this.deletePipelineTopology = this.deletePipelineTopologyOperation.bind(this);
         this.createPipelineTopology = this.createPipelineTopologyOperation.bind(this);
@@ -82,6 +84,14 @@ export class Edge extends Component {
 
             if (response.ok) {
                 await this.getLivePipelines();
+
+                // Delete Cloud PipelineTopology
+                try {
+                    this.api.deleteLivePipeline(livePipeline);
+                }
+                catch (cloudEx) {
+                    alert(`Cannot delete the Cloud LivePipeline ${livePipeline}: ${cloudEx}`);
+                }
             }
             else {
                 const errorMessageObj = JSON.parse(await response.json());
@@ -102,6 +112,14 @@ export class Edge extends Component {
 
             if (response.ok) {
                 await this.getPipelinesTopologies();
+
+                // Delete Cloud PipelineTopology
+                try {
+                    this.api.deletePipelineTopology(pipelineTopologyName);
+                }
+                catch (cloudEx) {
+                    alert(`Cannot delete the Cloud PipelineTopology ${pipelineTopologyName}: ${cloudEx}`);
+                }
             }
             else {
                 const errorMessageObj = JSON.parse(await response.json());
@@ -115,8 +133,6 @@ export class Edge extends Component {
 
     createPipelineTopologyBody(pipelineTopologyName) {
         const { ioTHubArmId, ioTHubUserAssignedManagedIdentityArmId } = this.state.appSettings;
-        const behindProxy = true;
-        const RtspDeviceIdParameter = "rtspDeviceIdParameter";
 
         let body = {
             "Name": pipelineTopologyName,
@@ -149,22 +165,9 @@ export class Edge extends Component {
                         "description": "video name parameter"
                     },
                     {
-                        "name": "inferencingUrl",
+                        "name": "rtspDeviceIdParameter",
                         "type": "String",
-                        "description": "inferencing Url",
-                        "default": "http://yolov3/score"
-                    },
-                    {
-                        "name": "inferencingUserName",
-                        "type": "String",
-                        "description": "inferencing endpoint user name.",
-                        "default": "dummyUserName"
-                    },
-                    {
-                        "name": "inferencingPassword",
-                        "type": "String",
-                        "description": "inferencing endpoint password.",
-                        "default": "dummyPassword"
+                        "description": "device id parameter"
                     }
                 ],
                 "sources": [
@@ -179,48 +182,13 @@ export class Edge extends Component {
                                 "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
                                 "username": "${rtspUsernameParameter}",
                                 "password": "${rtspPasswordParameter}"
-                            }
-                        }
-                    }
-                ],
-                "processors": [
-                    {
-                        "@type": "#Microsoft.VideoAnalyzer.HttpExtension",
-                        "name": "httpExtension",
-                        "endpoint": {
-                            "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
-                            "url": "${inferencingUrl}",
-                            "credentials": {
-                                "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
-                                "username": "${inferencingUserName}",
-                                "password": "${inferencingPassword}"
-                            }
-                        },
-                        "image": {
-                            "scale": {
-                                "mode": "pad",
-                                "width": "416",
-                                "height": "416"
                             },
-                            "format": {
-                                "@type": "#Microsoft.VideoAnalyzer.ImageFormatBmp"
+                            "tunnel": {
+                                "@type": "#Microsoft.VideoAnalyzer.IotSecureDeviceRemoteTunnel",
+                                "deviceId": "${rtspDeviceIdParameter}",
+                                "iotHubArmId": ioTHubArmId,
+                                "userAssignedManagedIdentityArmId": ioTHubUserAssignedManagedIdentityArmId
                             }
-                        },
-                        "inputs": [
-                            {
-                                "nodeName": "rtspSource",
-                                "outputSelectors": [
-                                    {
-                                        "property": "mediaType",
-                                        "operator": "is",
-                                        "value": "video"
-                                    }
-                                ]
-                            }
-                        ],
-                        "samplingOptions": {
-                            "skipSamplesWithoutAnnotation": "false",
-                            "maximumSamplesPerSecond": "5"
                         }
                     }
                 ],
@@ -244,27 +212,39 @@ export class Edge extends Component {
             }
         };
 
-        if (behindProxy) {
-            let parameters = body.Properties.parameters;
-            const deviceIdParam = {
-                "name": RtspDeviceIdParameter,
-                "type": "String",
-                "description": "device id parameter"
+        return body;
+    }
+
+    createLivePipelineBody(pipelineTopologyName, livePipelineName, videoName, rtspUrl, rtspUsername, rtspPassword, deviceId) {
+        let body = {
+            "name": livePipelineName,
+            "properties": {
+                "topologyName": pipelineTopologyName,
+                "description": "live pipeline test description",
+                "bitrateKbps": 500,
+                "parameters": [
+                    {
+                        "name": "rtspUrlParameter",
+                        "value": rtspUrl
+                    },
+                    {
+                        "name": "rtspUsernameParameter",
+                        "value": rtspUsername
+                    },
+                    {
+                        "name": "rtspPasswordParameter",
+                        "value": rtspPassword
+                    },
+                    {
+                        "name": "videoNameParameter",
+                        "value": videoName
+                    },
+                    {
+                        "name": "rtspDeviceIdParameter",
+                        "value": deviceId
+                    }
+                ]
             }
-            parameters.push(deviceIdParam);
-
-            let source = body.Properties.sources.pop();
-            let endpoint = source.endpoint;
-            source.endpoint = {
-                ...endpoint, "tunnel": {
-                    "@type": "#Microsoft.VideoAnalyzer.IotSecureDeviceRemoteTunnel",
-                    "deviceId": "${" + RtspDeviceIdParameter + "}",
-                    "iotHubArmId": ioTHubArmId,
-                    "userAssignedManagedIdentityArmId": ioTHubUserAssignedManagedIdentityArmId
-                }
-            };
-
-            body.Properties.sources.push(source);
         }
 
         return body;
@@ -289,8 +269,13 @@ export class Edge extends Component {
                     await this.getPipelinesTopologies());
 
                 // Create Cloud PipelineTopology
-                const body = this.createPipelineTopologyBody(pipelineTopologyName);
-                await this.api.createPipelineTopology(body);
+                try {
+                    const body = this.createPipelineTopologyBody(pipelineTopologyName);
+                    this.api.createPipelineTopology(body);
+                }
+                catch (cloudEx) {
+                    alert(`Cannot create the PipelineTopology: ${cloudEx}`);
+                }
             }
             else {
                 const errorMessageObj = await response.json();
@@ -307,7 +292,7 @@ export class Edge extends Component {
 
     async createLivePipelineOperation(event) {
         event.preventDefault();
-        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName } = this.state;
+        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, deviceId } = this.state;
 
         const body = {
             pipelineTopologyName: livePipelineTopologyName,
@@ -330,8 +315,17 @@ export class Edge extends Component {
             });
 
             if (response.ok) {
-                this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "", videoName: "" },
-                    async() => await this.getLivePipelines());           
+                this.setState({ livePipelineName: "", rtspUrl: "", rtspUsername: "", rtspPassword: "", livePipelineTopologyName: "", videoName: "", deviceId: "" },
+                    async () => await this.getLivePipelines());
+
+                // Create Cloud LivePipeline
+                try {
+                    const body = this.createLivePipelineBody(livePipelineTopologyName, livePipelineName, videoName, rtspUrl, rtspUsername, rtspPassword, deviceId);
+                    await this.api.createLivePipeline(body);
+                }
+                catch (cloudEx) {
+                    alert(`Cannot create the Cloud LivePipeline: ${cloudEx}`);
+                }
             }
             else {
                 const errorMessageObj = await response.json();
@@ -339,7 +333,7 @@ export class Edge extends Component {
             }
         }
         catch (e) {
-            console.log(e);
+            alert(`Cannot create the Cloud LivePipeline: ${e}`);
         }
         finally {
             this.setState({ loadingLivePipelines: false });
@@ -552,13 +546,13 @@ export class Edge extends Component {
     }
 
     validate(elementType) {
-        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, pipelineTopologyName } = this.state;
+        const { livePipelineName, rtspUrl, rtspUsername, rtspPassword, livePipelineTopologyName, videoName, pipelineTopologyName, deviceId } = this.state;
 
         let isLivePipelineValid = false;
         let isPipelineTopologiesValid = false;
 
         if (elementType === "livepipeline") {
-            isLivePipelineValid = livePipelineName.length > 0 && rtspUrl.length > 0 && rtspUsername.length > 0 && rtspPassword.length > 0 && livePipelineTopologyName.length > 0 && videoName.length > 0;
+            isLivePipelineValid = livePipelineName.length > 0 && rtspUrl.length > 0 && rtspUsername.length > 0 && rtspPassword.length > 0 && livePipelineTopologyName.length > 0 && videoName.length > 0 && deviceId.length > 0;
         }
         else {
             isPipelineTopologiesValid = pipelineTopologyName.length;
@@ -666,12 +660,6 @@ export class Edge extends Component {
                                                 </div>
                                             )
                                         }
-                                            {/*<button className="btn btn-primary" onClick={() => this.deleteLivePipeline(data.name)}>{data.na}Delete</button><br /><br />*/}
-                                            {/*<button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, 'inactive')}>Activate</button>*/}
-                                            {/*<button className="btn btn-primary" onClick={() => this.changeStateLivePipeline(data.name, 'active')}>Deactivate</button><br /><br />*/}
-                                            {/*<button className="btn btn-primary" onClick={() => this.getVideoPlayback(data.properties.parameters.find(x => x.name === "videoNameParameter").value, data.name)}>Play video</button>*/}
-                                            {/*<button className="btn btn-primary" onClick={() => this.listenToEvent()}>Listen</button><br /><br />*/}
-                                            {/*<button className="btn btn-primary" onClick={() => this.stopToEvent()}>Stop</button><br /><br />*/}
                                     </td>
                                     </tr>
                                     <tr>
@@ -701,10 +689,6 @@ export class Edge extends Component {
                 </table>
                 <h5>Add new</h5>
                 <form name="livepipeline" onSubmit={(e) => this.createLivePipeline(e)}>
-                    <fieldset>
-                        <label>Name:</label>&nbsp;
-                        <input name="livePipelineName" value={this.state.livePipelineName} onChange={(e) => this.setFormData(e)} />
-                    </fieldset>
                     <fieldset >
                         <label>Topology Name:</label>&nbsp;
                          <select name="livePipelineTopologyName" value={this.state.livePipelineTopologyName} onChange={(e) => this.setFormData(e)}>
@@ -715,6 +699,10 @@ export class Edge extends Component {
                                 )
                             }
                         </select>
+                    </fieldset>
+                    <fieldset>
+                        <label>Name:</label>&nbsp;
+                        <input name="livePipelineName" value={this.state.livePipelineName} onChange={(e) => this.setFormData(e)} />
                     </fieldset>
                     <fieldset >
                         <label>rtsp Url:</label>&nbsp;
@@ -731,6 +719,10 @@ export class Edge extends Component {
                     <fieldset >
                         <label>Video Name:</label>&nbsp;
                         <input name="videoName" value={this.state.videoName} onChange={(e) => this.setFormData(e)} placeholder="SampleVideo" />
+                    </fieldset>
+                    <fieldset >
+                        <label>Device Id:</label>&nbsp;
+                        <input name="deviceId" value={this.state.deviceId} onChange={(e) => this.setFormData(e)} placeholder="Camera1" />
                     </fieldset>
                     <button type="submit" disabled={!this.state.livePipelineEnabled}>Create</button>
                 </form>
