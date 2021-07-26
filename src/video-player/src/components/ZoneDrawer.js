@@ -1,5 +1,6 @@
 import React, {useEffect, Fragment} from 'react';
 import PropTypes from 'prop-types';
+import { Button } from 'react-bootstrap';
 
 const ZoneDrawer = props => {
     useEffect(() => {
@@ -43,6 +44,15 @@ const ZoneDrawer = props => {
         
     }, [props.videoName]);
 
+    const copyToClipboard = () =>
+    {
+        var copyText = document.getElementById("zone-output");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999)
+        document.execCommand("copy");
+        alert('Zone Drawer output copied to clipboard.');
+    };
+
     return (
         <div className="containerBlock">
             {
@@ -51,6 +61,7 @@ const ZoneDrawer = props => {
                     <div>
                         <label>Zone Information:</label><br/>
                         <textarea className="zone-output" id="zone-output"></textarea>
+                        <Button onClick={() => copyToClipboard()} className="copyToClipboard">Copy to clipboard</Button>
                     </div>
                     <div id="zonedrawer-container" className="zonedrawer-container"></div>
                 </Fragment>

@@ -79,3 +79,8 @@ h1 {
 .containerPlayback {
  width: 85%;
 }
+
+.copyToClipboard {
+  margin-right: 0px;
+  margin-right: 5px;
+}
