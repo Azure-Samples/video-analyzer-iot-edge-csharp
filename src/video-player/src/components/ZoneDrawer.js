@@ -67,9 +67,13 @@ const ZoneDrawer = props => {
                 (props.showOpen) ?
                 <Fragment>
                     <div>
-                        <label>Zone Information:</label><br/>
-                        <textarea className="zone-output" id="zone-output" onChange={(e) => handleOnChange(e.target.value)}></textarea>
-                        <Button onClick={() => copyToClipboard()} disabled={disableCopy} className="copyToClipboard">Copy to clipboard</Button>
+                        <div>
+                            <label>Zone Information:</label>
+                        </div>
+                        <div className="zoneInfoContainer">
+                            <textarea className="zone-output" id="zone-output" onChange={(e) => handleOnChange(e.target.value)}></textarea>
+                            <Button onClick={() => copyToClipboard()} disabled={disableCopy} className="copyToClipboard">Copy to clipboard</Button>
+                        </div>
                     </div>
                     <div id="zonedrawer-container" className="zonedrawer-container"></div>
                 </Fragment>
