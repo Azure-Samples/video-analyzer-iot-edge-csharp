@@ -1,8 +1,11 @@
-import React, {useEffect, Fragment} from 'react';
+import React, {useState, useEffect, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 
 const ZoneDrawer = props => {
+
+    const [disableCopy, setDisableCopy] = useState(true);
+
     useEffect(() => {
         if(props.videoName !== '')
         {
@@ -37,21 +40,26 @@ const ZoneDrawer = props => {
                 }
                 const output = document.querySelector('#zone-output');
                 output.value = currentOutput;
+                handleOnChange(output.value);
             });
             // Load the zone drawer widget
             zoneDrawer.load();
         }
         
-    }, [props.videoName]);
+    }, [props.videoName, props.token, props.clientApi]);
 
     const copyToClipboard = () =>
     {
         var copyText = document.getElementById("zone-output");
         copyText.select();
-        copyText.setSelectionRange(0, 99999)
+        copyText.setSelectionRange(0, 99999);
         document.execCommand("copy");
         alert('Zone Drawer output copied to clipboard.');
     };
+
+    const handleOnChange = (value) => {
+        setDisableCopy(value === "");
+    }
 
     return (
         <div className="containerBlock">
@@ -60,8 +68,8 @@ const ZoneDrawer = props => {
                 <Fragment>
                     <div>
                         <label>Zone Information:</label><br/>
-                        <textarea className="zone-output" id="zone-output"></textarea>
-                        <Button onClick={() => copyToClipboard()} className="copyToClipboard">Copy to clipboard</Button>
+                        <textarea className="zone-output" id="zone-output" onChange={(e) => handleOnChange(e.target.value)}></textarea>
+                        <Button onClick={() => copyToClipboard()} disabled={disableCopy} className="copyToClipboard">Copy to clipboard</Button>
                     </div>
                     <div id="zonedrawer-container" className="zonedrawer-container"></div>
                 </Fragment>

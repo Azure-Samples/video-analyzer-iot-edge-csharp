@@ -17,7 +17,7 @@ const VideoPlayer = props => {
             avaPlayer.load();
         }
         
-    }, [props.videoName]);
+    }, [props.videoName, props.token, props.clientApi]);
 
     return (
         <div>

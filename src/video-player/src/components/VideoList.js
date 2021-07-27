@@ -2,8 +2,7 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import ApiHelper from '../helpers/ApiHelper';
 import LoadingOverlay from 'react-loading-overlay'
-import { Button, DropdownButton } from 'react-bootstrap';
-import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import { Button } from 'react-bootstrap';
 
 const VideoList = props => {
     const [videos, setVideos] = useState([]);
