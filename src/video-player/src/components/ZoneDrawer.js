@@ -14,7 +14,8 @@ const ZoneDrawer = props => {
             const widgetContainer = document.querySelector("#zonedrawer-container");
             widgetContainer.innerHTML = '';
             const output = document.querySelector('#zone-output');
-            output.innerText = '';
+            output.value = '';
+            setDisableCopy(true);
             // Create new zone drawer widget
             const zoneDrawer = new window.ava.widgets.zoneDrawer();
             widgetContainer.appendChild(zoneDrawer);
