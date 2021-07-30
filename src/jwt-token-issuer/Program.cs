@@ -108,6 +108,14 @@ namespace Tools.JwtTokenIssuer
                     WriteKeyInfo(keyInfo);
 
                     WriteMessage("Token: ", _tokenHandler.WriteToken(token), ConsoleColor.Cyan);
+
+                    // Wait for user input
+                    Console.WriteLine("Press ESC to stop");
+                    while (!(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape))
+                    {
+                        Thread.Sleep(100);
+                    }
+                    Console.WriteLine("Exiting...");
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception e)
