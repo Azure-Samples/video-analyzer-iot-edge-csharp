@@ -81,7 +81,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/ava-utilities/avaextension/yolov3-onnx:1.0",
+              "image": "mcr.microsoft.com/ava-utilities/avaextension/http-yolov3-onnx-v1.0",
               "createOptions": {}
             }
           },
