@@ -3,6 +3,7 @@ import './App.css';
 import VideoList from './components/VideoList';
 import VideoPlayer from './components/VideoPlayer';
 import ZoneDrawer from './components/ZoneDrawer';
+import VideoClipPlayer from './components/VideoClipPlayer';
 import { Tab, Row, Nav, Col } from 'react-bootstrap';
 
 function App() {
@@ -28,20 +29,26 @@ function App() {
               <Col sm={2}>
                 <Nav variant="pills" className="flex-column">
                   <Nav.Item>
-                    <Nav.Link eventKey="first">Zone Drawer</Nav.Link>
+                    <Nav.Link eventKey="first">Video Player</Nav.Link>
                   </Nav.Item>
                   <Nav.Item>
-                    <Nav.Link eventKey="second">Video Player</Nav.Link>
+                    <Nav.Link eventKey="second">Zone Drawer</Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="third">Video Clips</Nav.Link>
                   </Nav.Item>
                 </Nav>
               </Col>
               <Col sm={10}>
                 <Tab.Content>
                   <Tab.Pane eventKey="first">
-                    <ZoneDrawer token={TOKEN} clientApi={CLIENT_API_ENDPOINT_URL} videoName={videoName} showOpen={videoName !== ''}/>
+                    <VideoPlayer token={TOKEN} clientApi={CLIENT_API_ENDPOINT_URL} videoName={videoName} show={videoName !== ''}/> 
                   </Tab.Pane>
                   <Tab.Pane eventKey="second">
-                    <VideoPlayer token={TOKEN} clientApi={CLIENT_API_ENDPOINT_URL} videoName={videoName} show={videoName !== ''}/> 
+                    <ZoneDrawer token={TOKEN} clientApi={CLIENT_API_ENDPOINT_URL} videoName={videoName} showOpen={videoName !== ''}/>
+                  </Tab.Pane>
+                  <Tab.Pane eventKey="third">
+                    <VideoClipPlayer token={TOKEN} clientApi={CLIENT_API_ENDPOINT_URL} videoName={videoName} show={videoName !== ''}/> 
                   </Tab.Pane>
                 </Tab.Content>
               </Col>

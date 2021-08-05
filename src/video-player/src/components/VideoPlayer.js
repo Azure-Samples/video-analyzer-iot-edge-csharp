@@ -14,6 +14,7 @@ const VideoPlayer = props => {
               videoName: props.videoName,
               locale: 'en'
             });
+
             avaPlayer.load();
         }
         
