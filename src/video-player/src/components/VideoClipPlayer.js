@@ -11,22 +11,30 @@ const VideoClipPlayer = props => {
     const [clips, onClipsChange] = useState([]);
 
     useEffect(() => {
+        onClipsChange([]);
+        const avaPlayer = document.getElementById("avaClipPlayer");
+        
         if(props.videoName !== '')
         {
-            const avaPlayer = document.getElementById("avaClipPlayer");
-            avaPlayer.innerHTML = '';
+           async function loadPlayer() {
+                avaPlayer.innerHTML = '';
 
-            avaPlayer.configure({
-              token: props.token,
-              clientApiEndpointUrl: props.clientApi,
-              videoName: props.videoName,
-              locale: 'en'
-            });
+                avaPlayer.configure({
+                token: props.token,
+                clientApiEndpointUrl: props.clientApi,
+                videoName: props.videoName,
+                locale: 'en'
+                });
 
-            avaPlayer.load();
+                await avaPlayer.load();
+            }
+
+            loadPlayer();
         }
+
+        avaPlayer.pause();
         
-    }, [props.videoName, props.token, props.clientApi, clips]);
+    }, [props.videoName, props.token, props.clientApi]);
 
     const addDate = () => {
         const newDates = [...clips];
