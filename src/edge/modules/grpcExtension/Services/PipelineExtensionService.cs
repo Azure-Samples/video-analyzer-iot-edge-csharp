@@ -103,7 +103,16 @@ namespace GrpcExtension
                 if (messageCount < _batchSize)
                 {
                     // Return acknowledge message
-                    mediaStreamMessageResponse.MediaSample = new MediaSample();
+                    var mediaSample = new MediaSample();
+                    mediaSample.Inferences.Add(
+                        new Inference()
+                        {
+                            Subtype = "BatchAggregation",
+                            Event = new Event() { Name = $"Adding image #{messageCount} to batch." }
+                        }
+                    );
+
+                    mediaStreamMessageResponse.MediaSample = mediaSample;
                     await responseStream.WriteAsync(mediaStreamMessageResponse);
                     messageCount++;
                     continue;
