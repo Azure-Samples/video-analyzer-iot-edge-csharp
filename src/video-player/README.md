@@ -27,3 +27,23 @@ npm start
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
+## Creating Video Clips
+1. Select the **Video Clips** tab
+
+2. Click on the *Start time* date time picker:
+![Image](./images/start-date.png)
+
+3. Select the date of the video:
+![Image](./images/select-date.png)
+
+4. Select the start time of the video clip:
+![Image](./images/select-time.png)
+
+5. Perform the same steps for the *End time*
+
+6. Once you add set the *Start time* and *End time*, click on the **Add** button:
+![Image](./images/add-button.png)
+
+7. Select the created *Video Clip* from the drop down list:
+![Image](./images/select-clip.png)
+
