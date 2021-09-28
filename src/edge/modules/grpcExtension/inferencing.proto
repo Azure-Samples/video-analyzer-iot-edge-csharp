@@ -24,20 +24,21 @@ message Inference {
 
   InferenceType type = 1;
   string subtype = 2;                      // Free form subtype id
-  string inference_id = 3;                 // Optional identifier for this inference event
-  repeated string related_inferences = 4;  // Ids of inferences which are related to this inference 
+  string inference_id = 3;                 // Optional intra-frame inference identifier
+  repeated string related_inferences = 4;  // Set of related inferences
+  string sequence_id = 14;                 // Optional inter-frame sequence identifier
 
   oneof value {                            // Must match type
-    Classification classification = 5;         
-    Motion motion = 6;              
-    Entity entity = 7;              
+    Classification classification = 5;
+    Motion motion = 6;
+    Entity entity = 7;
     Text text = 8;
     Event event = 9;
     InferenceOther other = 13;
   }
 
   // Complementary data that can be used to augment the original inference. These
-  // are transmitted opaquely through the pipeline and are meant for application 
+  // are transmitted opaquely through the pipeline and are meant for application
   // consumption only.
   map<string, string> extensions = 15;
 }
@@ -64,7 +65,7 @@ message Entity {
   Tag tag = 1;                        // Entity tag. Examples: person, bicycle, car, ...
   repeated Attribute attributes = 2;  // Additional entity attributes. Examples: color=red, body=sedan, etc.
   Rectangle box = 3;                  // Entity bounding box
-  string id = 4;                      // Optional entity id for identification and/or tracking
+  string id = 4;                      // Optional id for entity identification
 }
 
 //
@@ -115,13 +116,13 @@ message Tag {
 //
 // - Values are normalized between 0.0 and 1.0 as fraction of the input image.
 // - Extensions which are receiving padded images (pillarbox or letterbox) should return the bounding boxes
-//   based on the padded image. The Live Video Analytics pipeline will adjust the bounding boxes based on 
+//   based on the padded image. The Live Video Analytics pipeline will adjust the bounding boxes based on
 //   the padding before publishing the inferences. For example, if the image has .2 padding on the left and
 //   right sides of the image, the rectangle (0.2, 0.0, 0.6, 1.0) will be adjusted to (0.0, 0.0, 1.0, 1.0)
 //   by Live Video Analytics.
 //
 message Rectangle {
-  float l = 1;              // Left:    distance from the image's left edge to the rectangle's left edge 
+  float l = 1;              // Left:    distance from the image's left edge to the rectangle's left edge
   float t = 2;              // Top:     distance from the image's top edge to the rectangle's top edge
   float w = 3;              // Width:   rectangle width
   float h = 4;              // Height:  rectangle height

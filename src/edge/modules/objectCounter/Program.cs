@@ -147,7 +147,7 @@ namespace objectCounter
                     {
                         string subject = message.Properties["subject"];
                         string signature = "/livePipelines/";
-                        if (subject.IndexOf(signature) == 0)
+                        if (subject.Contains(signature, StringComparison.OrdinalIgnoreCase))
                         {
                             outputMessage.Properties.Add("eventTime", message.Properties["eventTime"]);
                             await moduleClient.SendEventAsync("objectCountTrigger", outputMessage);

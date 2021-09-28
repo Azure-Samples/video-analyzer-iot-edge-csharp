@@ -3,13 +3,13 @@
 This folder contains a [JSON Web Token](https://datatracker.ietf.org/doc/html/rfc7519) generation application to use with Video Analyzer.
 
 ## Prerequisites 
-  * Install [.Net 5.0.x SDK](https://dotnet.microsoft.com/download)
+  * Install [.Net Core 3.1 SDK](https://dotnet.microsoft.com/download)
 
 ## Build the JWTTokenIssuer
 1.  Download the files
 2.  Open a CMD prompt and navigate to the folder you downloaded the files to
-3.  run `dotnet build`
-4.  run `dotnet run`
+3.  Run `dotnet build`
+4.  Run `dotnet run`
    
 **NOTE:** The dotnet build created bin folder in the same directory.  Path to the compiled application is -  {directory}\bin\Debug\netcoreapp3.1\JwtTokenIssuer.exe
 
