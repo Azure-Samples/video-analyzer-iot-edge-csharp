@@ -30,7 +30,7 @@ In addition to the modules defined in deployment.template.json, this deployment 
 
 ### deployment.grpcyolov3ngpu.template.json  
 
-In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [GPU-optimized YOLOv3 module](https://github.com/Azure/video-analyzer/tree/main/edge-modules/extensions/yolo/yolov3/grpc-gpu). This IoT Edge module runs the YOLOv3 ONNX model behind a gRPC endpoint and is optimized to run on edge devices with an Nvidia GPU. To run this deployment manifest, the edge device must have Nvidia's CUDA drivers installed, as shown in this [seciton of the documentation](https://github.com/Azure/video-analyzer/tree/main/edge-modules/extensions/yolo/yolov3/grpc-gpu).
+In addition to the modules defined in deployment.template.json, this deployment manifest template includes this [GPU-optimized YOLOv3 module](https://github.com/Azure/video-analyzer/tree/main/edge-modules/extensions/yolo/yolov3/grpc-gpu). This IoT Edge module runs the YOLOv3 ONNX model behind a gRPC endpoint and is optimized to run on edge devices with an Nvidia GPU. To run this deployment manifest, the edge device must have Nvidia's CUDA drivers installed, as shown in this [section of the documentation](https://github.com/Azure/video-analyzer/tree/main/edge-modules/extensions/yolo/yolov3/grpc-gpu).
 
 ### deployment.grpctinyyolov3icpu.template.json  
 
