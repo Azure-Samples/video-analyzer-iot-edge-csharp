@@ -115,7 +115,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/azure-cognitive-services/vision/spatial-analysis:1.4",
+              "image": "mcr.microsoft.com/azure-cognitive-services/vision/spatial-analysis:latest",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
