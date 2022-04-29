@@ -8,9 +8,9 @@ products:
 description: "The samples in this repo show how to use the Azure Video Analyzer module to analyze live video using AI modules of your choice and optionally record video on the edge device or in the cloud."  
 ---
 
-# Azure Video Analyzer samples
+# Deprecated. Azure Video Analyzer samples
 
-This repository contains C# samples for Azure Video Analyzer
+We’re retiring the Azure Video Analyzer preview service, you're advised to transition your applications off of Video Analyzer by 01 December 2022. This repo is no longer being maintained.
 
 ## Contents
 
